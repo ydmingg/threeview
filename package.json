@@ -1,0 +1,14 @@
+{
+  "name": "threeJS",
+  "version": "1.3.2201",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "devDependencies": {
+    "@types/node": "^18.13.0",
+    "typescript": "^4.9.5",
+    "vite": "^5.1.4"
+  }
+}
