@@ -1,6 +1,6 @@
 {
 	"name": "threeview",
-	"version": "1.6.1401",
+	"version": "1.6.1402",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",

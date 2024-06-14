@@ -125,14 +125,17 @@ export const dem2 = () => {
     }
 
     function createPanel() {
-        const panel = new GUI({ width: 310 });
-
+        const panel = new GUI({ width: 310,autoPlace: true }) ;
+        panel.domElement.id = 'panel';
+        
         const folder1 = panel.addFolder('Base Actions');
         const folder2 = panel.addFolder('Additive Action Weights');
         const folder3 = panel.addFolder('General Speed');
+        
 
         panelSettings = {
-            'modify time scale': 1.0
+            'modify time scale': 1.0,
+            'wireframe': false
         };
 
         const baseNames = ['None', ...Object.keys(baseActions)];
@@ -140,18 +143,20 @@ export const dem2 = () => {
         for (let i = 0, l = baseNames.length; i !== l; ++i) {
             const name = baseNames[i];
             const settings = baseActions[name];
+            
             panelSettings[name] = function () {
                 const currentSettings = baseActions[currentBaseAction];
                 const currentAction = currentSettings ? currentSettings.action : null;
                 const action = settings ? settings.action : null;
 
-                if (currentAction !== action) {
+                if (currentAction !== action && currentAction && action) {
                     prepareCrossFade(currentAction, action, 0.35);
                 }
             };
 
-            crossFadeControls.push(folder1.add(panelSettings, name));
+            // crossFadeControls.push(folder1.add(panelSettings, name));
         }
+        
 
         for (const name of Object.keys(additiveActions)) {
             const settings = additiveActions[name];
@@ -169,7 +174,7 @@ export const dem2 = () => {
         folder2.open();
         folder3.open();
 
-        crossFadeControls.forEach(function (control) {
+        crossFadeControls.forEach(function (control:any) {
             control.setInactive = function () {
                 control.domElement.classList.add('control-inactive');
             };
@@ -211,7 +216,7 @@ export const dem2 = () => {
             currentBaseAction = 'None';
         }
 
-        crossFadeControls.forEach(function (control) {
+        crossFadeControls.forEach(function (control:any) {
             const name = control.property;
 
             if (name === currentBaseAction) {
