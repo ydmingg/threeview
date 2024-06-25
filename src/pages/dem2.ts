@@ -58,7 +58,6 @@ export const dem2 = () => {
         const loader = new GLTFLoader();
         loader.load('./src/pages/gltf/Xbot.glb', function (gltf) {
             
-            
             model = gltf.scene;
             scene.add(model);
 
@@ -153,8 +152,9 @@ export const dem2 = () => {
                     prepareCrossFade(currentAction, action, 0.35);
                 }
             };
-
-            // crossFadeControls.push(folder1.add(panelSettings, name));
+            
+            
+            crossFadeControls.push(folder1.add(panelSettings, name));
         }
         
 
@@ -268,6 +268,7 @@ export const dem2 = () => {
     function animate() {
         for (let i = 0; i !== numAnimations; ++i) {
             const action = allActions[i];
+
             const clip = action.getClip();
             const settings = baseActions[clip.name] || additiveActions[clip.name];
             settings.weight = action.getEffectiveWeight();
