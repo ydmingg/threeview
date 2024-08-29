@@ -16,8 +16,9 @@
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "paths": {
-            "@src/*": ["src/*"],
-            "@pages/*":["pages/*"]
+            "src/*": ["src/*"],
+            "pages/*":["pages/*"],
+            "three/*": ["./node_modules/@types/three/*"],
         },
         "lib": [
             "ES2021",

@@ -10,7 +10,7 @@ export default defineConfig({
         minify: "esbuild", // 压缩代码
         rollupOptions: {
             input: {   // 入口文件
-                "model": "src/index.ts",
+                "model": "src/demo/index.ts",
             },
             output: {
                 dir: "dist", // 输出目录
@@ -20,13 +20,13 @@ export default defineConfig({
         }
     },
     server: {
+        host: "0.0.0.0",// 主机IP地址
         port: 8077, // 设置开发服务器端口
-        host: "192.168.5.235", // 主机IP地址
     },
     resolve: {
         alias: {
-            "@src": path.resolve(__dirname, "src"),
-            "@pages": path.resolve(__dirname, "pages")
+            "src": path.resolve(__dirname, "src"),
+            "pages": path.resolve(__dirname, "pages")
         }
     }
 });
