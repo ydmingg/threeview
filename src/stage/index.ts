@@ -1,27 +1,35 @@
 import * as THREE from 'three';
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { Watcher } from "../stage/watcher";
 
 export class Stage { 
     private _opts: any;
+    private _watcher: any;
     scene: THREE.Scene;
-	renderer: THREE.WebGLRenderer;
-	camera: THREE.PerspectiveCamera;
+    renderer: THREE.WebGLRenderer;
+    camera: THREE.PerspectiveCamera;
     clock: THREE.Clock;
     orbit_controls: OrbitControls;
+    
 
     constructor(opts: any) { 
-        this._opts = opts
-
+        const watcher = new Watcher();
+        
         this.scene = new THREE.Scene();
-		this.renderer = new THREE.WebGLRenderer({antialias: true});
-		this.camera = new THREE.PerspectiveCamera();
-		this.clock = new THREE.Clock();
+        this.renderer = new THREE.WebGLRenderer({antialias: true});
+        this.camera = new THREE.PerspectiveCamera();
+        this.clock = new THREE.Clock();
         this.orbit_controls = new OrbitControls(this.camera, this.renderer.domElement);
         
+        
+        this._opts = opts
+        this._watcher = watcher;
         this.initLoading();
         this.initCamera(this._opts);
         this.initRenderer(this._opts);
         this.initResponsiveResize(this._opts);
+
+
         
     }
 
@@ -70,18 +78,15 @@ export class Stage {
 
     // 初始化场景
     setData(url: string) {
-		console.log(url);
-		
-		
 		this.renderer.setAnimationLoop(() => {
 			this.renderer.render(this.scene, this.camera);
 			const delta_time = Math.min(0.05, this.clock.getDelta());
-			this.word.update(delta_time);
+			this._watcher.update(delta_time);
 			this.orbit_controls.update();
-		});
+        });
+        
 	}
 
-    
     
 
 

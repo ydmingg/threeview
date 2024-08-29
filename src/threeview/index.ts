@@ -14,7 +14,9 @@ export class ThreeView {
     }
 
     setData(data: any) {
-		console.log(data);
+        const core = this._core
+        core.setData(data);
+        
 		
 	}
 }
