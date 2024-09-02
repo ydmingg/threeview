@@ -16,7 +16,6 @@ export class Stage extends Emitter {
     ui!: UI;
     loader!: Loader
     world!: World
-    environment!: Environment
 
     constructor(opts: any) { 
         super();
@@ -29,7 +28,6 @@ export class Stage extends Emitter {
 
         this._opts = opts
         this.scene = new THREE.Scene();
-        this.environment = new Environment(this._opts);
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.camera = new THREE.PerspectiveCamera();
         this.clock = new THREE.Clock();
@@ -93,7 +91,7 @@ export class Stage extends Emitter {
 
     // 初始化场景
     setData(data: any) {
-        this.environment.loadScenes(data)
+        this.world.setData(data);
         
         
 	}
