@@ -52,7 +52,7 @@ export class World {
 		this._stage.ui.removeLoading();
 
 		// 场景模型加载完毕后将场景中需要光线投射检测的物体传入给rayCasterControls
-		this.ray_caster_controls.bindClickRayCastObj(this.environment.raycast_objects);
+		// this.ray_caster_controls.bindClickRayCastObj(this.environment.raycast_objects);
 	}
 
     setData(data: any) { 
