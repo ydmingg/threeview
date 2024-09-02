@@ -1,35 +1,50 @@
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { Watcher } from "../stage/watcher";
+import { UI, Loader, World, Environment } from "../renderer";
+import { Emitter } from "../util";
 
-export class Stage { 
+let instance: Stage | null = null;
+export class Stage extends Emitter { 
     private _opts: any;
-    private _watcher: any;
-    scene: THREE.Scene;
-    renderer: THREE.WebGLRenderer;
-    camera: THREE.PerspectiveCamera;
-    clock: THREE.Clock;
-    orbit_controls: OrbitControls;
-    
+
+    scene!: THREE.Scene;
+    renderer!: THREE.WebGLRenderer;
+    camera!: THREE.PerspectiveCamera;
+    clock!: THREE.Clock;
+    orbit_controls!: OrbitControls;
+
+    ui!: UI;
+    loader!: Loader
+    world!: World
+    environment!: Environment
 
     constructor(opts: any) { 
-        const watcher = new Watcher();
-        
+        super();
+
+        if (instance) {
+            return instance
+        }
+
+        instance = this
+
+        this._opts = opts
         this.scene = new THREE.Scene();
+        this.environment = new Environment(this._opts);
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.camera = new THREE.PerspectiveCamera();
         this.clock = new THREE.Clock();
         this.orbit_controls = new OrbitControls(this.camera, this.renderer.domElement);
         
         
-        this._opts = opts
-        this._watcher = watcher;
         this.initLoading();
         this.initCamera(this._opts);
         this.initRenderer(this._opts);
         this.initResponsiveResize(this._opts);
 
-
+        this.ui = new UI(this._opts);
+        this.loader = new Loader(this._opts);
+        this.world = new World(this._opts);
+        
         
     }
 
@@ -77,13 +92,9 @@ export class Stage {
     }
 
     // 初始化场景
-    setData(url: string) {
-		this.renderer.setAnimationLoop(() => {
-			this.renderer.render(this.scene, this.camera);
-			const delta_time = Math.min(0.05, this.clock.getDelta());
-			this._watcher.update(delta_time);
-			this.orbit_controls.update();
-        });
+    setData(data: any) {
+        this.environment.loadScenes(data)
+        
         
 	}
 

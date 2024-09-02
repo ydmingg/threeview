@@ -9,7 +9,6 @@ export class Core{
     
     constructor(container: HTMLDivElement, opts: CoreOptions) { 
 		const { width, height, devicePixelRatio = 1 } = opts;
-
 		this._container = container
 		const stageContent = {
 			width,
@@ -19,15 +18,14 @@ export class Core{
 		}
 
 		// 实例化3d空间
-		const stage = new Stage(stageContent)
-        this._stage = stage
+        const stage = new Stage(stageContent)
 
-        
+        this._stage = stage
 
 		
 	}
 
-	setData(data: any) { 
+    setData(data: any) { 
 		this._stage.setData(data);
 	}
 	
