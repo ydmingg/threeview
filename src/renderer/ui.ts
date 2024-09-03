@@ -145,9 +145,6 @@ export class UI {
 
 	removeLoading() {
 		this.doms.loading.remove();
-	}
-
-	// private _isBInA(A: string[], B: string[]) {
-	// 	return B.some(name => A.includes(name));
-	// }
+    }
+    
 }

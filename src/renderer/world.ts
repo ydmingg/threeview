@@ -42,10 +42,11 @@ export class World {
     }
     
      // 点击进入展馆后响应动态文件
-    // private _onEnterApp() {
-    //     // 场景模型加载完毕后开始加载音频
-	// 	this._environment.positional_audio?.play();
-	// }
+    private _onEnterApp() {
+        // 场景模型加载完毕后开始加载音频
+        // this._environment.positional_audio?.play();
+        this._stage.control_manage.enabled();
+	}
 
     private _handleLoadProgress([{url, loaded, total}]: [{url: string, loaded: number, total: number}]) {
         const percentage = ((loaded / total) * 100).toFixed(0);
