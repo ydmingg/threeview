@@ -1,46 +1,35 @@
 import * as THREE from "three";
 import { PositionalAudioHelper } from "three/examples/jsm/helpers/PositionalAudioHelper.js";
-
+import { MeshBVH, MeshBVHOptions, StaticGeometryGenerator } from "three-mesh-bvh";
 // import Core from "../core";
 import { Stage } from "../stage";
 import { Loader } from "./loader";
-import { Events } from "../types";
-
-
-// import {isLight, isMesh} from "../utils/typeAssert";
-// import {MeshBVH, MeshBVHOptions, StaticGeometryGenerator} from "three-mesh-bvh";
+import { Events, CharacterParams } from "../types";
+import { isMesh, isLight } from "../util";
 // import {Reflector} from "../lib/Reflector";
 
 export class Environment {
     private _opts: any;
     private _stage: Stage;
-    private loader: Loader;
-    private collision_scene: THREE.Group | undefined;
-    private audio_mesh: THREE.Mesh | undefined;
-	private positional_audio: THREE.PositionalAudio | undefined;
+    private _loader: Loader;
+    collision_scene: THREE.Group | undefined;
+    audio_mesh: THREE.Mesh | undefined;
+	positional_audio: THREE.PositionalAudio | undefined;
 	collider: THREE.Mesh | undefined;
-	private texture_boards: Record<string, THREE.Texture> = {};
-	private gallery_boards: Record<string, THREE.Mesh> = {};
-	raycast_objects: THREE.Object3D[] = [];
+    texture_boards: Record<string, THREE.Texture> = {};
+    gallery_boards: Record<string, THREE.Mesh> = {};
+    raycast_objects: THREE.Object3D[] = [];
+    characterParams: CharacterParams = {}
 	is_load_finished = false;
 
-    constructor(otps: any) {
-        this._opts = otps
+    constructor(opts: any) {
+        this._opts = opts
         this._stage = new Stage(this._opts);
-        this.loader = this._stage.loader
-        // this.loadScenes({
-        //     scene: '../../static/models/scene_collision.glb',
-        //     word: '../../static/models/scene_desk_obj.glb'
-        // });
-        // console.log(this._stage.loader);
-        
-        
+        this._loader = this._stage.loader
         
 	}
 
-	/*
-	* 加载全部场景物体（地图、画框和贴图、地板反射）
-	* */
+	// 加载全部场景物体（地图、画框和贴图、地板反射）
 	async loadScenes(data: any) {
 		try {
             await this._loadSceneAndCollisionDetection(data);
@@ -56,6 +45,7 @@ export class Environment {
 		}
 	}
     
+    // 加载媒体文件
     private async _loadAudio(data: any): Promise<void> { 
         this.audio_mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({color: 0xff0000}));
 		this.audio_mesh.position.set(-15.9, 4.49, 36.42);
@@ -85,7 +75,7 @@ export class Environment {
 
 	private async _loadBoardsTexture(data: any): Promise<void> {
 		for (let i = 0; i < data.textures.length; i++) {
-			this.texture_boards[i + 1] = await this.loader.texture_loader.loadAsync(data.textures[i]);
+			this.texture_boards[i + 1] = await this._loader.texture_loader.loadAsync(data.textures[i]);
 		}
 
 		for (const key in this.texture_boards) {
@@ -112,9 +102,7 @@ export class Environment {
 		return Promise.resolve();
     }
 
-	// /*
-	// * 设置画板userData数据、贴图翻转
-	// * */
+	// 设置画板userData数据、贴图翻转
 	// private _configureGallery() {
 	// 	for (const key in this.texture_boards) {
 	// 		const board = this.gallery_boards[`gallery${key}_board`];
@@ -142,9 +130,7 @@ export class Environment {
 	// 	}
 	// }
 
-	// /*
-	// * 产生地面镜面反射
-	// * */
+	// 产生地面镜面反射
 	// private _createSpecularReflection() {
 	// 	const mirror = new Reflector(new PlaneGeometry(100, 100), {
 	// 		textureWidth: window.innerWidth * window.devicePixelRatio,
@@ -161,13 +147,13 @@ export class Environment {
 	// 加载不含碰撞其他的场景
 	private _loadStaticScene(data: any): Promise<void> {
 		return new Promise(resolve => {
-			this.loader.gltf_loader.load(data.module.word, (gltf) => {
+			this._loader.gltf_loader.load(data.module.word, (gltf) => {
 				this._stage.scene.add(gltf.scene);
 				gltf.scene.traverse(item => {
 					if (item.name === "computer") {
 						item.userData = {
 							name: item.name,
-							title: "噢，是远方 🏕",
+							title: "嘟嘟嘟嘟嘟嘟嘟",
 						};
 						this.raycast_objects.push(item);
 					}
@@ -182,7 +168,7 @@ export class Environment {
 	// 加载含碰撞检测的场景
     private _loadSceneAndCollisionDetection(data: any): Promise<void> {
         return new Promise(resolve => {
-			this.loader.gltf_loader.load(data.module.scene, (gltf) => {
+			this._loader.gltf_loader.load(data.module.scene, (gltf) => {
 				this.collision_scene = gltf.scene;
 
 				this.collision_scene.updateMatrixWorld(true);
@@ -192,9 +178,9 @@ export class Environment {
 						item.castShadow = true;
 					}
 
-					// if (item.name.includes("PointLight") && isLight(item)) {
-					// 	item.intensity *= 2000;
-					// }
+					if (item.name.includes("PointLight") && isLight(item)) {
+						item.intensity *= 2000;
+					}
 
 					if (item.name === "home002") {
 						item.castShadow = true;
@@ -202,21 +188,22 @@ export class Environment {
 					}
 
 					// 提取出相框元素
-					// if (/gallery.*_board/.test(item.name) && isMesh(item)) {
-					// 	this.gallery_boards[item.name] = item;
-					// }
+					if (/gallery.*_board/.test(item.name) && isMesh(item)) {
+						this.gallery_boards[item.name] = item;
+					}
 
 					this.raycast_objects.push(item);
 				});
 
-				// const static_generator = new StaticGeometryGenerator(this.collision_scene);
-				// static_generator.attributes = ["position"];
+				const static_generator = new StaticGeometryGenerator(this.collision_scene);
+				static_generator.attributes = ["position"];
 
-				// const merged_geometry = static_generator.generate();
-				// merged_geometry.boundsTree = new MeshBVH(merged_geometry, {lazyGeneration: false} as MeshBVHOptions);
-
-				// this.collider = new THREE.Mesh(merged_geometry);
-				// this.core.scene.add(this.collision_scene);
+				const merged_geometry = static_generator.generate();
+				merged_geometry.boundsTree = new MeshBVH(merged_geometry, {lazyGeneration: false} as MeshBVHOptions);
+                
+                this.collider = new THREE.Mesh(merged_geometry);
+                
+				this._stage.scene.add(this.collision_scene);
 
 				resolve();
 			}, (event) => {

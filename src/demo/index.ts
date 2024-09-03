@@ -37,6 +37,8 @@ const threeView = new ThreeView(container, {
     height
 })
 
+
+
 // 渲染
 threeView.setData(data)
 

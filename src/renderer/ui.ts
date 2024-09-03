@@ -2,13 +2,13 @@ import { Events } from "../types";
 import { Stage } from "../stage";
 
 export class UI {
-    private _otps: Stage;
+    private _opts: Stage;
     private _stage: Stage;
 
 	private doms: {
 		/* 初始加载进度相关 */
 		loading: HTMLElement;
-		// loading_complete: HTMLElement;
+		loading_complete: HTMLElement;
 
 		// /* 预览文案相关 */
 		// preview_tooltip: HTMLElement;
@@ -30,13 +30,13 @@ export class UI {
 		// operating_intro: HTMLElement;
 	};
 
-    constructor(otps: any) {
-        this._otps = otps;
-        this._stage = new Stage(this._otps);
+    constructor(opts: any) {
+        this._opts = opts;
+        this._stage = new Stage(this._opts);
 
 		this.doms = {
 			loading: document.querySelector(".loading")!,
-			// loading_complete: document.querySelector(".loading-complete")!,
+			loading_complete: document.querySelector(".loading-complete")!,
 			// preview_tooltip: document.querySelector(".preview-tooltip")!,
 			// preview_tips: document.querySelector(".preview-tips")!,
 			// boards_dialog: document.querySelector(".boards-info")!,
@@ -56,13 +56,13 @@ export class UI {
 	handleClick(e: MouseEvent) {
 		if (e.target instanceof HTMLElement) {
 			// 定义一套对应元素click响应事件的策略
-			// const MAP_EVENT = [
-			// 	{
-			// 		verify: () => {
-			// 			return (e.target as HTMLElement).classList.contains("start");
-			// 		},
-			// 		handler: this.onClickEnterApp.bind(this)
-			// 	},
+			const MAP_EVENT = [
+				// {
+				// 	verify: () => {
+				// 		return (e.target as HTMLElement).classList.contains("start");
+				// 	},
+				// 	handler: this.onClickEnterApp.bind(this)
+				// },
 			// 	{
 			// 		verify: () => {
 			// 			return this._isBInA(["boards-info-close", "boards-info"], (e.target as HTMLElement).classList.value.split(" "));
@@ -81,7 +81,7 @@ export class UI {
 			// 		},
 			// 		handler: this.hideHelp.bind(this)
 			// 	}
-			// ];
+			];
 
 			// const event = MAP_EVENT.find(item => item.verify());
 			// if (event) {
@@ -93,12 +93,12 @@ export class UI {
 	// onClickEnterApp() {
 	// 	this.doms.loading_complete.classList.remove("display-none");
 	// 	this.doms.loading_complete.remove();
-	// 	// this.core.$emit(ON_ENTER_APP);
+	// 	this._stage.$emit(Events.ON_ENTER_APP);
 	// }
 
-	showHelp() {
-		// this.doms.operating_intro.classList.remove("display-none");
-	}
+	// showHelp() {
+	// 	// this.doms.operating_intro.classList.remove("display-none");
+	// }
 
 	// hideHelp() {
 	// 	this.doms.operating_intro.classList.add("display-none");

@@ -10,7 +10,7 @@ export class ThreeView {
         const core = new Core(mount, { width, height, devicePixelRatio });
 
         this._core = core;
-
+        
     }
 
     setData(data: any) {
