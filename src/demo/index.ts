@@ -3,9 +3,13 @@ import { ThreeView } from '../index'
 const container = document.getElementById('app') as HTMLDivElement
 const { width, height} = { width:container.clientWidth, height:container.clientHeight }
 
+const url = [
+    'http://192.168.5.235:8077/static/models/scene_collision.glb',
+    '../../static/models/suzanne.gltf',
+]
 const data = {
     module: {
-        scene: '../../static/models/scene_collision.glb',
+        scene: url[0],
         word: '../../static/models/scene_desk_obj.glb'
 
     },

@@ -146,14 +146,14 @@ export class Environment {
 
 	// 加载不含碰撞其他的场景
 	private _loadStaticScene(data: any): Promise<void> {
-		return new Promise(resolve => {
-			this._loader.gltf_loader.load(data.module.word, (gltf) => {
+        return new Promise(resolve => {
+            this._loader.gltf_loader.load(data.module.word, (gltf) => {
 				this._stage.scene.add(gltf.scene);
 				gltf.scene.traverse(item => {
 					if (item.name === "computer") {
 						item.userData = {
 							name: item.name,
-							title: "嘟嘟嘟嘟嘟嘟嘟",
+							title: "llllll",
 						};
 						this.raycast_objects.push(item);
 					}
@@ -162,16 +162,17 @@ export class Environment {
 			}, (event) => {
 				this._stage.$emit(Events.ON_LOAD_PROGRESS, {url: data.module.word, loaded: event.loaded, total: event.total});
 			});
-		});
-	}
+        });
+    }
 
 	// 加载含碰撞检测的场景
     private _loadSceneAndCollisionDetection(data: any): Promise<void> {
         return new Promise(resolve => {
+            
 			this._loader.gltf_loader.load(data.module.scene, (gltf) => {
 				this.collision_scene = gltf.scene;
 
-				this.collision_scene.updateMatrixWorld(true);
+				// this.collision_scene.updateMatrixWorld(true);
 
 				this.collision_scene.traverse(item => {
 					if (item.name === "home001" || item.name === "PointLight") {
@@ -211,5 +212,6 @@ export class Environment {
                 
 			});
 		});
-	}
+    }
+    
 }
