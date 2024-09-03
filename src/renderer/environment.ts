@@ -33,9 +33,9 @@ export class Environment {
 	async loadScenes(data: any) {
 		try {
             await this._loadSceneAndCollisionDetection(data);
-			await this._loadStaticScene(data);
-            await this._loadBoardsTexture(data);
-            await this._loadAudio(data);
+			// await this._loadStaticScene(data);
+            // await this._loadBoardsTexture(data);
+            // await this._loadAudio(data);
 			// this._configureGallery();
 			// this._createSpecularReflection();
 			this.is_load_finished = true;
@@ -172,7 +172,7 @@ export class Environment {
 			this._loader.gltf_loader.load(data.module.scene, (gltf) => {
 				this.collision_scene = gltf.scene;
 
-				// this.collision_scene.updateMatrixWorld(true);
+				this.collision_scene.updateMatrixWorld(true);
 
 				this.collision_scene.traverse(item => {
 					if (item.name === "home001" || item.name === "PointLight") {

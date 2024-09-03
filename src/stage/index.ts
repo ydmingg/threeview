@@ -35,6 +35,7 @@ export class Stage extends Emitter {
         
         
         this.initLoading();
+        this._initScene();
         this.initCamera(this._opts);
         this.initRenderer(this._opts);
         this.initResponsiveResize(this._opts);
@@ -94,6 +95,11 @@ export class Stage extends Emitter {
         this.world.setData(data);
         
         
+    }
+    
+    // 初始化场景颜色
+    private _initScene() {
+		this.scene.background = new THREE.Color("#333");
 	}
 
     
