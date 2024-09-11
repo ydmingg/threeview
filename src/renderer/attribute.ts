@@ -4,6 +4,8 @@ import { Stage } from '../stage'
 import { CharacterParams } from '../types'
 import { Events } from '../types'
 
+
+
 export class Attribute { 
     private _stage: Stage
     private attribute!: THREE.Mesh<RoundedBoxGeometry, THREE.MeshBasicMaterial>
@@ -16,31 +18,43 @@ export class Attribute {
 	};
     
     private reset_position: THREE.Vector3; // 重生点
-    private player_is_on_ground = false; // 是否在地面
-    private velocity = new THREE.Vector3();
+	private reset_y: number; // 掉落高度
+	private gravity: number; // 重力
+	private jump_height: number; // 跳跃高度
+	private speed: number; // 速度
+	private player_is_on_ground = false; // 是否在地面
+	private velocity = new THREE.Vector3();
 
-    private temp_vector = new THREE.Vector3();
+	private up_vector = new THREE.Vector3(0, 1, 0);
+	private temp_vector = new THREE.Vector3();
 	private temp_vector2 = new THREE.Vector3();
-    private temp_mat = new THREE.Matrix4();
-    private temp_box = new THREE.Box3();
-    private temp_segment = new THREE.Line3();
+	private temp_box = new THREE.Box3();
+	private temp_mat = new THREE.Matrix4();
+	private temp_segment = new THREE.Line3();
 
-    constructor(opts: any, reset_position: any) {
+    constructor(opts: any, { 
+        reset_position = new THREE.Vector3(0, 5, 0),
+		reset_y = -25,
+		speed = 6,
+		jump_height = 20,
+		gravity = -50
+    }: CharacterParams) {
         this._stage = new Stage(opts)
         this.reset_position = reset_position;
-        // this._stage.$on(Events.ON_KEY_DOWN, this._onKeyDown.bind(this));
+		this.reset_y = reset_y;
+		this.gravity = gravity;
+		this.jump_height = jump_height;
+		this.speed = speed;
         
         this._createCharacter();
         
+        this._stage.$on(Events.ON_KEY_DOWN, this._onKeyDown.bind(this));
     }
 
-    update(delta_time: number, collider: THREE.Mesh, { 
-        reset_y = -25,
-        gravity = -50
-    }: CharacterParams) {
+    update(delta_time: number, collider: THREE.Mesh) {
 		this._updateOrbitControls();
 
-		this._updateCharacter(delta_time, gravity);
+		this._updateCharacter(delta_time);
 
 		this._checkCollision(delta_time, collider);
 
@@ -49,7 +63,7 @@ export class Attribute {
 		this._stage.orbit_controls.target.copy(this.attribute.position);
 		this._stage.camera.position.add(this.attribute.position);
 
-        this._checkReset(reset_y);
+        this._checkReset();
 	}
 
     private _createCharacter() {
@@ -62,61 +76,7 @@ export class Attribute {
 		this.attribute.visible = false;
 		this._stage.scene.add(this.attribute);
     }
-    
-    // 掉落地图检测
-    private _checkReset(reset_y: any) {
-		if (this.attribute.position.y < reset_y) {
-			this._reset();
-		}
-    }
-    
-    private _reset() {
-		this.velocity.set(0, 0, 0);
-		this.attribute.position.copy(this.reset_position);
-		this._stage.camera.position.sub(this._stage.orbit_controls.target);
-		this._stage.orbit_controls.target.copy(this.attribute.position);
-		this._stage.camera.position.add(this.attribute.position);
-		this._stage.orbit_controls.update();
-    }
-    
-    private _updateCharacter(delta_time: number, gravity: any) {
-		this.velocity.y += this.player_is_on_ground ? 0 : delta_time * gravity;
-		this.attribute.position.addScaledVector(this.velocity, delta_time);
-		const angle = this._stage.orbit_controls.getAzimuthalAngle();
 
-		// if (this._stage.control_manage.mode === "pc") { // 根据PC端操作移动角色方位
-		// 	if (this._stage.control_manage.key_status["KeyW"]) {
-		// 		this.temp_vector.set(0, 0, -1).applyAxisAngle(this.up_vector, angle);
-		// 		this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-		// 	}
-
-		// 	if (this._stage.control_manage.key_status["KeyS"]) {
-		// 		this.temp_vector.set(0, 0, 1).applyAxisAngle(this.up_vector, angle);
-		// 		this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-		// 	}
-
-		// 	if (this._stage.control_manage.key_status["KeyA"]) {
-		// 		this.temp_vector.set(-1, 0, 0).applyAxisAngle(this.up_vector, angle);
-		// 		this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-		// 	}
-
-		// 	if (this._stage.control_manage.key_status["KeyD"]) {
-		// 		this.temp_vector.set(1, 0, 0).applyAxisAngle(this.up_vector, angle);
-		// 		this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-		// 	}
-		// } else { // 根据移动端操作移动角色方位
-		// 	const degree = this._stage.control_manage.move_degree;
-		// 	if (degree) {
-		// 		const angle = (degree - 90) * (Math.PI / 180);
-		// 		this.temp_vector.set(0, 0, -1).applyAxisAngle(this.up_vector, angle);
-		// 		this.temp_vector.applyQuaternion(this._stage.camera.quaternion);
-		// 		this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-		// 	}
-        // }
-        
-		this.attribute.updateMatrixWorld();
-    }
-    
     private _checkCollision(delta_time: number, collider: THREE.Mesh) {
         // 根据碰撞来调整player位置
         const capsule_info = this.capsule_info;
@@ -127,7 +87,7 @@ export class Attribute {
         // 获取胶囊体在对撞机局部空间中的位置
         this.temp_segment.start.applyMatrix4(this.attribute.matrixWorld).applyMatrix4(this.temp_mat);
         this.temp_segment.end.applyMatrix4(this.attribute.matrixWorld).applyMatrix4(this.temp_mat);
-
+        
         // 获取胶囊体的轴对齐边界框
         this.temp_box.expandByPoint(this.temp_segment.start);
         this.temp_box.expandByPoint(this.temp_segment.end);
@@ -152,12 +112,104 @@ export class Attribute {
                 }
             }
         });
-    }
 
+        // 检查后得到胶囊体对撞机的调整位置
+		// 场景碰撞并移动它. capsule_info.segment.start被假定为玩家模型的原点。
+		const new_position = this.temp_vector;
+		new_position.copy(this.temp_segment.start).applyMatrix4(collider.matrixWorld);
+
+		// 检查对撞机移动了多少
+		const delta_vector = this.temp_vector2;
+		delta_vector.subVectors(new_position, this.attribute.position);
+
+		this.player_is_on_ground = delta_vector.y > Math.abs(delta_time * this.velocity.y * 0.25);
+
+		const offset = Math.max(0.0, delta_vector.length() - 1e-5);
+		delta_vector.normalize().multiplyScalar(offset);
+
+		// 调整player模型位置
+		this.attribute.position.add(delta_vector);
+
+		if (!this.player_is_on_ground) {
+			delta_vector.normalize();
+			this.velocity.addScaledVector(delta_vector, -delta_vector.dot(this.velocity));
+		} else {
+			this.velocity.set(0, 0, 0);
+		}
+    }
+    
+    // 掉落地图检测
+    private _checkReset() {
+		if (this.attribute.position.y < this.reset_y) {
+			this._reset();
+		}
+    }
+    
+    private _reset() {
+		this.velocity.set(0, 0, 0);
+		this.attribute.position.copy(this.reset_position);
+		this._stage.camera.position.sub(this._stage.orbit_controls.target);
+		this._stage.orbit_controls.target.copy(this.attribute.position);
+		this._stage.camera.position.add(this.attribute.position);
+		this._stage.orbit_controls.update();
+    }
+    
+    private _updateCharacter(delta_time: number) {
+		this.velocity.y += this.player_is_on_ground ? 0 : delta_time * this.gravity;
+		this.attribute.position.addScaledVector(this.velocity, delta_time);
+		const angle = this._stage.orbit_controls.getAzimuthalAngle();
+
+		if (this._stage.control_manage.mode === "pc") { // 根据PC端操作移动角色方位
+			if (this._stage.control_manage.key_status["KeyW"]) {
+				this.temp_vector.set(0, 0, -1).applyAxisAngle(this.up_vector, angle);
+				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
+			}
+
+			if (this._stage.control_manage.key_status["KeyS"]) {
+				this.temp_vector.set(0, 0, 1).applyAxisAngle(this.up_vector, angle);
+				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
+			}
+
+			if (this._stage.control_manage.key_status["KeyA"]) {
+				this.temp_vector.set(-1, 0, 0).applyAxisAngle(this.up_vector, angle);
+				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
+			}
+
+			if (this._stage.control_manage.key_status["KeyD"]) {
+				this.temp_vector.set(1, 0, 0).applyAxisAngle(this.up_vector, angle);
+				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
+			}
+		} else { // 根据移动端操作移动角色方位
+			const degree = this._stage.control_manage.move_degree;
+			if (degree) {
+				const angle = (degree - 90) * (Math.PI / 180);
+				this.temp_vector.set(0, 0, -1).applyAxisAngle(this.up_vector, angle);
+				this.temp_vector.applyQuaternion(this._stage.camera.quaternion);
+				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
+			}
+        }
+        
+		this.attribute.updateMatrixWorld();
+    }
+    
     private _updateOrbitControls() {
 		this._stage.orbit_controls.maxPolarAngle = Math.PI;
 		this._stage.orbit_controls.minDistance = 1e-4;
 		this._stage.orbit_controls.maxDistance = 1e-4;
+    }
+    
+    private _onKeyDown([key_code]: [keycode: string]) {
+		if (key_code === "Space") {
+			this._onCharacterJump();
+		}
 	}
+
+	private _onCharacterJump() {
+		if (this.player_is_on_ground) {
+			this.velocity.y = this.jump_height;
+		}
+	}
+
+
 
 }

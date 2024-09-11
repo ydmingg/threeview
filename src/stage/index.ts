@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { UI, Loader, World, ControlManage } from "../renderer";
+import { UI, Loader, World } from "../renderer";
 import { Emitter } from "../util";
 
 let instance: Stage | null = null;
@@ -14,7 +14,6 @@ export class Stage extends Emitter {
     orbit_controls!: OrbitControls;
 
     ui!: UI;
-    control_manage!: ControlManage;
     loader!: Loader
     world!: World
 
@@ -42,7 +41,6 @@ export class Stage extends Emitter {
         this.initResponsiveResize(this._opts);
 
         this.ui = new UI(this._opts);
-        this.control_manage = new ControlManage(this._opts);
         this.loader = new Loader(this._opts);
         this.world = new World(this._opts);
         

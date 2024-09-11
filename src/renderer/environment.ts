@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { PositionalAudioHelper } from "three/examples/jsm/helpers/PositionalAudioHelper.js";
 import { MeshBVH, MeshBVHOptions, StaticGeometryGenerator } from "three-mesh-bvh";
-// import Core from "../core";
 import { Stage } from "../stage";
 import { Loader } from "./loader";
 import { Events, CharacterParams } from "../types";
@@ -33,12 +32,11 @@ export class Environment {
 	async loadScenes(data: any) {
 		try {
             await this._loadSceneAndCollisionDetection(data);
-			// await this._loadStaticScene(data);
             // await this._loadBoardsTexture(data);
             // await this._loadAudio(data);
 			// this._configureGallery();
 			// this._createSpecularReflection();
-			this.is_load_finished = true;
+			// this.is_load_finished = true;
 			this._stage.$emit(Events.ON_LOAD_MODEL_FINISH);
             
 		} catch (e) {
@@ -47,7 +45,7 @@ export class Environment {
 	}
     
     // 加载媒体文件
-    // private async _loadAudio(data: any): Promise<void> { 
+    // private async _loadAudio(data: any): Promise<void> {
     //     this.audio_mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({color: 0xff0000}));
 	// 	this.audio_mesh.position.set(-15.9, 4.49, 36.42);
 	// 	this.audio_mesh.visible = false;
@@ -143,36 +141,16 @@ export class Environment {
 	// // 	}
 	// // 	mirror.rotation.x = -0.5 * Math.PI;
 	// // 	this.core.scene.add(mirror);
-	// // }
-
-	// // 加载不含碰撞其他的场景
-	// private _loadStaticScene(data: any): Promise<void> {
-    //     return new Promise(resolve => {
-    //         this._loader.gltf_loader.load(data.module.word, (gltf) => {
-	// 			this._stage.scene.add(gltf.scene);
-	// 			gltf.scene.traverse(item => {
-	// 				if (item.name === "computer") {
-	// 					item.userData = {
-	// 						name: item.name,
-	// 						title: "llllll",
-	// 					};
-	// 					this.raycast_objects.push(item);
-	// 				}
-	// 			});
-	// 			resolve();
-	// 		}, (event) => {
-	// 			this._stage.$emit(Events.ON_LOAD_PROGRESS, {url: data.module.word, loaded: event.loaded, total: event.total});
-	// 		});
-    //     });
-    // }
-
+    // // }
+    
 	// 加载含碰撞检测的场景
     private _loadSceneAndCollisionDetection(data: any): Promise<void> {
         return new Promise(resolve => {
             
-			this._loader.gltf_loader.load(data.module.scene, (gltf) => {
-				this.collision_scene = gltf.scene;
-
+            this._loader.gltf_loader.load(data.module.scene, (gltf) => {
+                
+                this.collision_scene = gltf.scene;
+                
 				this.collision_scene.updateMatrixWorld(true);
 
 				this.collision_scene.traverse(item => {
@@ -187,12 +165,21 @@ export class Environment {
 					if (item.name === "home002") {
 						item.castShadow = true;
 						item.receiveShadow = true;
-					}
+                    }
+                    
+                    // 加载其他物体
+                    if (item.name === "computer") {
+                        item.userData = {
+                            name: item.name,
+                            title: "llllll",
+                        };
+                        this.raycast_objects.push(item);
+                    }
 
 					// 提取出相框元素
-					if (/gallery.*_board/.test(item.name) && isMesh(item)) {
-						this.gallery_boards[item.name] = item;
-					}
+					// if (/gallery.*_board/.test(item.name) && isMesh(item)) {
+					// 	this.gallery_boards[item.name] = item;
+					// }
 
 					this.raycast_objects.push(item);
 				});
@@ -207,7 +194,7 @@ export class Environment {
 				this._stage.scene.add(this.collision_scene);
 
 				resolve();
-			}, (event) => {
+            }, (event) => {
                 this._stage.$emit(Events.ON_LOAD_PROGRESS, { url: data.module.scene, loaded: event.loaded, total: event.total });
                 
 			});
