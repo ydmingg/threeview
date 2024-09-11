@@ -1,12 +1,15 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader";
-import { TDSLoader } from "three/examples/jsm/loaders/TDSLoader";
-import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
-import { Events } from "../types";
+import {
+    Events,
+    GLTFLoader,
+    OBJLoader,
+    STLLoader,
+    FBXLoader,
+    ColladaLoader,
+    TDSLoader,
+    MTLLoader,
+ } from "../types";
+
 import { Stage } from "../stage";
 
 export class Loader { 

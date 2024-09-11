@@ -1,13 +1,8 @@
-import { Environment } from "./environment";
-// import Character from "../character";
-// import Css3DRenderer from "../css3DRenderer";
-// import Audio from "../audio";
 import * as THREE from "three";
-// import { Emitter } from "../util";
 import { Events, CoreOptions } from "../types";
 import { Stage } from "../stage";
 import { Attribute } from "../renderer";
-
+import { Environment } from "./environment";
 
 export class World { 
     private _opts: any;
@@ -22,29 +17,18 @@ export class World {
 
         this._stage.$on(Events.ON_LOAD_PROGRESS, this._handleLoadProgress.bind(this));
         this._stage.$on(Events.ON_LOAD_MODEL_FINISH, this._onLoadModelFinish.bind(this));
-        
 
         this._environment = new Environment(this._opts);
         this._attribute = new Attribute(this._stage, { speed: 12 });
-        
-        // this._onEnterApp()
-       
 
     }
 
     update(delta: number) {
 		if (this._environment.collider && this._environment.is_load_finished) {
-            // this.css_3d_renderer.update();
             
             this._attribute.update(delta, this._environment.collider);
 		}
     }
-    
-     // 点击进入展馆后响应动态文件
-    // private _onEnterApp() {
-    //     // this._environment.positional_audio?.play();
-    //     // this._stage.control_manage.enabled();
-    // }
     
     private async _onLoadModelFinish(data: any) {
 		// 音频加载完毕后移除加载进度UI，显示进入确认UI
@@ -56,29 +40,11 @@ export class World {
         const percentage = ((loaded / total) * 100).toFixed(0);
         
         if (/.*\.(blob|glb|gltf)$/i.test(url)) {
-            this._stage.ui.updateLoadingProgress(`${url.includes("collision") ? "加载碰撞场景模型" : "加载其他场景模型"}：${percentage}%`);
+            this._stage.ui.updateLoadingProgress(`${url.includes("collision") ? "加载模型" : "加载其他场景模型"}：${percentage}%`);
         }
-		// if (/.*\.(jpg|png|jpeg)$/i.test(url)) {
-		// 	this._stage.ui.updateLoadingProgress("加载图片素材中...");
-		// }
-		// if (/.*\.(m4a|mp3)$/i.test(url)) {
-		// 	this._stage.ui.updateLoadingProgress("加载声音资源中...");
-		// }
     }
-
-    // private _onShowTooltip([{msg, show_preview_tips}]: [{ msg: string, show_preview_tips: boolean }]) {
-	// 	this._stage.ui.showPreviewTooltip(msg, show_preview_tips);
-	// }
-
-	// private _onHideTooltip() {
-	// 	this._stage.ui.hidePreviewTooltip();
-	// }
-
     
-
     setData(data: any) { 
-        this._environment.loadScenes(data)
-        
         // 更新renderer
         this._stage.renderer.setAnimationLoop(() => {
 			this._stage.renderer.render(this._stage.scene, this._stage.camera);
@@ -86,8 +52,9 @@ export class World {
 			this.update(delta_time);
 			this._stage.orbit_controls.update();
         });
+        
+        this._environment.loadScenes(data)
 
     }
-
 
 }

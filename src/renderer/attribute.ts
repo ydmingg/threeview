@@ -54,7 +54,6 @@ export class Attribute {
     update(delta_time: number, collider: THREE.Mesh) {
 		this._updateOrbitControls();
 
-		this._updateCharacter(delta_time);
 
 		this._checkCollision(delta_time, collider);
 
@@ -153,45 +152,7 @@ export class Attribute {
 		this._stage.camera.position.add(this.attribute.position);
 		this._stage.orbit_controls.update();
     }
-    
-    private _updateCharacter(delta_time: number) {
-		this.velocity.y += this.player_is_on_ground ? 0 : delta_time * this.gravity;
-		this.attribute.position.addScaledVector(this.velocity, delta_time);
-		const angle = this._stage.orbit_controls.getAzimuthalAngle();
 
-		if (this._stage.control_manage.mode === "pc") { // 根据PC端操作移动角色方位
-			if (this._stage.control_manage.key_status["KeyW"]) {
-				this.temp_vector.set(0, 0, -1).applyAxisAngle(this.up_vector, angle);
-				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-			}
-
-			if (this._stage.control_manage.key_status["KeyS"]) {
-				this.temp_vector.set(0, 0, 1).applyAxisAngle(this.up_vector, angle);
-				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-			}
-
-			if (this._stage.control_manage.key_status["KeyA"]) {
-				this.temp_vector.set(-1, 0, 0).applyAxisAngle(this.up_vector, angle);
-				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-			}
-
-			if (this._stage.control_manage.key_status["KeyD"]) {
-				this.temp_vector.set(1, 0, 0).applyAxisAngle(this.up_vector, angle);
-				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-			}
-		} else { // 根据移动端操作移动角色方位
-			const degree = this._stage.control_manage.move_degree;
-			if (degree) {
-				const angle = (degree - 90) * (Math.PI / 180);
-				this.temp_vector.set(0, 0, -1).applyAxisAngle(this.up_vector, angle);
-				this.temp_vector.applyQuaternion(this._stage.camera.quaternion);
-				this.attribute.position.addScaledVector(this.temp_vector, this.speed * delta_time);
-			}
-        }
-        
-		this.attribute.updateMatrixWorld();
-    }
-    
     private _updateOrbitControls() {
 		this._stage.orbit_controls.maxPolarAngle = Math.PI;
 		this._stage.orbit_controls.minDistance = 1e-4;
