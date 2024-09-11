@@ -30,7 +30,7 @@ export class Environment {
 	async loadScenes(data: any) {
 		try {
             await this._loadSceneAndCollisionDetection(data);
-			this.is_load_finished = true;
+			// this.is_load_finished = true;
 			this._stage.$emit(Events.ON_LOAD_MODEL_FINISH);
             
 		} catch (e) {
