@@ -24,12 +24,15 @@ const viewerCfg = {
     enableProgressBar: true,
     
 }
+//实例化BimViewer
 const viewer = new BimViewer(viewerCfg);
 
-const menuConfig = {
+// 配置导航栏参数
+const menuConfig = { 
     [ToolbarMenuId.Measure]: { visible: true },
-    [ToolbarMenuId.Fullscreen]: { visible: false },
+    [ToolbarMenuId.Fullscreen]: { visible: false }, 
 };
+
 new AxisGizmoPlugin(viewer);
 new BimViewerToolbarPlugin(viewer, { menuConfig });
 new ContextMenuPlugin(viewer);
