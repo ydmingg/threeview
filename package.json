@@ -1,20 +1,13 @@
 {
 	"name": "threeview",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build"
 	},
 	"devDependencies": {
-		"@types/three": "^0.167.2",
 		"typescript": "^4.9.5",
 		"vite": "^5.1.4"
-	},
-	"dependencies": {
-		"@pattern-x/gemini-viewer-threejs": "^0.2.71",
-		"evter": "^1.0.2",
-		"three": "^0.167.1",
-		"three-mesh-bvh": "^0.7.6"
 	}
 }

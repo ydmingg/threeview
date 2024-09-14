@@ -18,7 +18,7 @@
         "paths": {
             "src/*": ["src/*"],
             "pages/*":["pages/*"],
-            "three/*": ["./node_modules/@types/three/*"],
+            "three/*": ["./node_modules/@types/three/*"]
         },
         "lib": [
             "ES2021",

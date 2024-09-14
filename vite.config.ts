@@ -10,7 +10,7 @@ export default defineConfig({
         minify: "esbuild", // 压缩代码
         rollupOptions: {
             input: {   // 入口文件
-                "model": "src/demo/index.ts",
+                "model": "src/index.ts",
             },
             output: {
                 dir: "dist", // 输出目录
