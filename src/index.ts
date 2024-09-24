@@ -9,6 +9,6 @@ const threeView = new ThreeView(app, {
     // devicePixelRatio:1
 });
 
-const data = '../module/suzanne.gltf'
 // 渲染数据
+const data = '../module/suzanne.glb'
 threeView.setData(data);

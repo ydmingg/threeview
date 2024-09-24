@@ -11,6 +11,7 @@ export class Core{
     camera!: THREE.PerspectiveCamera;
     renderer!: THREE.WebGLRenderer;
     orbit_controls!: OrbitControls;
+    clock!: THREE.Clock;
 
 
     constructor(container: HTMLDivElement, opts: CoreOptions) {
@@ -23,6 +24,7 @@ export class Core{
         this.camera = new THREE.PerspectiveCamera();
         this.renderer = new THREE.WebGLRenderer();
         this.orbit_controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.clock = new THREE.Clock();
 
         this._initScene();
         this._initCamera();
@@ -31,16 +33,39 @@ export class Core{
         // 动态更新视图
         window.addEventListener('resize', this._resizeWindow.bind(this)) 
 
+        const FPS = 30;
+        const renderT = 1 / FPS; //单位秒  间隔多长时间渲染渲染一次
+        let timeS = 0;
 
         // 动画循环
         this.renderer.setAnimationLoop(() => {
-            // 更新相机位置
-            this.renderer.render(this.scene, this.camera);
-            // 更新轨道控制器
-            this.orbit_controls.update();
+            
+            // 获取两帧的时间间隔
+            const T = this.clock.getDelta();
+            timeS = timeS + T;
+            // 通过时间判断，降低renderer.render执行频率
+            if (timeS > renderT) { 
+                // 控制台查看渲染器渲染方法的调用周期，也就是间隔时间是多少
+                console.log(`调用.render时间间隔`, timeS * 1000 + '毫秒');
+
+                // 更新相机位置
+                this.renderer.render(this.scene, this.camera);
+                // 更新轨道控制器
+                this.orbit_controls.update();
+                
+                timeS = 0;
+            }
+            
+            
         });
         
-        
+        // // 创建一个时钟对象Clock
+        // const clock = new THREE.Clock();
+        // // 设置渲染频率为30FBS，也就是每秒调用渲染器render方法大约30次
+        // const FPS = 30;
+        // const renderT = 1 / FPS; //单位秒  间隔多长时间渲染渲染一次
+        // let timeS = 0;
+
     }
 
     // 初始化场景
@@ -93,13 +118,14 @@ export class Core{
     // 添加物体
     setData(data: any) { 
         
-        // 加载物体
+        // 加载模型
         const loader = new GLTFLoader();
         loader.load(data, (gltf) => { 
-        
-            console.log(gltf.scene);
-            
             this.scene.add(gltf.scene);
+
+
+            
+
         })
         
         // console.log(data);
@@ -127,7 +153,10 @@ export class Core{
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
         
+
         
+
+
 
 
         // 添加聚光灯
