@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import type { CoreOptions } from '../types'
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"; 
+import Stats from 'three/examples/jsm/libs/stats.module';
 
 export class Core{ 
     private _container: HTMLDivElement;
@@ -33,9 +34,13 @@ export class Core{
         // 动态更新视图
         window.addEventListener('resize', this._resizeWindow.bind(this)) 
 
+        const stats = new Stats();
+        
         const FPS = 30;
         const renderT = 1 / FPS; //单位秒  间隔多长时间渲染渲染一次
         let timeS = 0;
+
+        document.querySelector("#popup")?.appendChild(stats.dom)
 
         // 动画循环
         this.renderer.setAnimationLoop(() => {
@@ -47,7 +52,7 @@ export class Core{
             if (timeS > renderT) { 
                 // 控制台查看渲染器渲染方法的调用周期，也就是间隔时间是多少
                 console.log(`调用.render时间间隔`, timeS * 1000 + '毫秒');
-
+                stats.update();
                 // 更新相机位置
                 this.renderer.render(this.scene, this.camera);
                 // 更新轨道控制器
