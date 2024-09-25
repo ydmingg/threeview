@@ -8,16 +8,20 @@ export class Loader {
     private _renderer: THREE.WebGLRenderer
 
     constructor(obj: any) { 
+        // 取出core中定义的场景
         this._scene = obj.scene
+        // 取出core中定义的网格
         this._mesh = obj.mesh
+        // 取出core中定义的渲染器
         this._renderer = obj.renderer
+
 
     }
 
-    // 加载场景和模型方法
+    // 异步加载全部场景和模型
     async loadScenes(data: any) { 
-        try{
-            // 加载场景
+        try {
+            // 开始加载模型
             await this._loadScenesModel(data);
 
 
@@ -27,19 +31,20 @@ export class Loader {
         }   
     }
 
+    // 处理模型加载
     private async _loadScenesModel(data: any) { 
         return new Promise(res => { 
             // 加载模型
             const loader = new GLTFLoader();
             loader.load(data, (gltf) => { 
-                // this.scene.add(gltf.scene);
+                this._scene.add(gltf.scene);
                 const group = gltf.scene;
                 group.updateMatrixWorld(true);
-                group.traverse(item => { 
-                    console.log(item);
-
+                // group.traverse(item => { 
+                //     item.
+                
                     
-                })
+                // })
                 
                 const static_generator = new StaticGeometryGenerator(group);
                 static_generator.attributes = ["position"];
@@ -82,11 +87,6 @@ export class Loader {
             this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
             
 
-            
-            
-
-
-
 
             // 添加聚光灯
             // const spotLight = new THREE.SpotLight(0xff0000, 5, 0, Math.PI / 4, 0.5, 2);
@@ -104,11 +104,7 @@ export class Loader {
             // 场景添加灯光
             this._scene.add(pointLight, pointLightHelper)
 
-
-
-
         })
     }
-    
 
 }
