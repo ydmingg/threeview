@@ -16,6 +16,10 @@ export default class ThreeView {
         this._core.setData(data)
     }
 
+    // 设置FPS
+    windowWiew(data: any) { 
+        this._core.windowWiew(data)
+    }
     
 
 }

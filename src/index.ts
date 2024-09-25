@@ -10,5 +10,14 @@ const threeView = new ThreeView(app, {
 });
 
 // 渲染数据
-const data = '../module/suzanne.glb'
+const data = '../module/suzanne.gltf'
 threeView.setData(data);
+
+// 加载FPS帧率
+threeView.windowWiew({
+    fps: true,
+    
+
+    
+});
+
