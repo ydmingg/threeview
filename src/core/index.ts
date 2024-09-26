@@ -1,11 +1,8 @@
 import * as THREE from 'three'
 import type { CoreOptions, windowViewPlugin } from '../types'
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"; 
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { Loader } from '../loader'
-
-import {MeshBVH, MeshBVHOptions, StaticGeometryGenerator} from "three-mesh-bvh";
 
 export class Core{ 
     private _container: HTMLDivElement;
@@ -45,33 +42,6 @@ export class Core{
         
         // 动态更新视图
         window.addEventListener('resize', this._resizeWindow.bind(this)) 
-
-    }
-
-    initupdate() { 
-        const FPS = 30;
-        const renderT = 1 / FPS; //单位秒  间隔多长时间渲染渲染一次
-        let timeS = 0;
-
-        // 动画循环
-        this.renderer.setAnimationLoop(() => {
-            
-            // 获取两帧的时间间隔
-            const T = this.clock.getDelta();
-            timeS = timeS + T;
-            // 通过时间判断，降低renderer.render执行频率
-            if (timeS > renderT) { 
-                // 控制台查看渲染器渲染方法的调用周期，也就是间隔时间是多少
-                // console.log(`调用.render时间间隔`, timeS * 1000 + '毫秒');
-                this.stats.update();
-                // 更新相机位置
-                this.renderer.render(this.scene, this.camera);
-                // 更新轨道控制器
-                this.orbit_controls.update();
-                timeS = 0;
-            }
-            
-        });
 
     }
 
@@ -125,8 +95,18 @@ export class Core{
 
     // 添加物体
     setData(data: any) { 
-        this.initupdate();
-        // 加载方法
+        // 创建循环动画
+        this.renderer.setAnimationLoop(() => {
+            // 循环调用函数中的update()方法，来刷新时间
+            this.stats.update();
+            // 循环刷新执行渲染操作
+            this.renderer.render(this.scene, this.camera);
+            // 更新轨道控制器
+            this.orbit_controls.update();
+            
+        });
+
+        // 加载模型、场景和材质等
         this._loader.loadScenes(data)
 
     }
@@ -136,14 +116,15 @@ export class Core{
         for (const key in data) {
             // FPS帧率
             if (key === "fps") { 
+                // 设置监视器面板，传入面板id（0:fps, 1: ms, 2: mb, 3+: custom）
+                this.stats.showPanel(1); 
+                // 将监视器添加到页面中
                 this._container.appendChild(this.stats.dom);
             }
-            //
+            // 
             
-
         }
 
-        
     }
 
 }

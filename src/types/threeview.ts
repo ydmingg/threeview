@@ -57,4 +57,3 @@ export type windowViewPlugin = {
     // onLoadedAnimationInterpolantFactoryMethodFunction?: () => void;
     // onLoadedAnimationInterpolantFactoryMethodFunctionType?: () => void;
 }
-

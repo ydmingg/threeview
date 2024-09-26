@@ -10,7 +10,7 @@ const threeView = new ThreeView(app, {
 });
 
 // 渲染数据
-const data = '../module/suzanne.gltf'
+const data = '../module/suzanne.glb'
 threeView.setData(data);
 
 // 加载视图工具
