@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
-import pkg from "./package.json";
 import path from "path"
+import pkg from "./package.json";
 
 export default defineConfig({
     // 配置选项

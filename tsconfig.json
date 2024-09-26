@@ -18,7 +18,9 @@
         "paths": {
             "src/*": ["src/*"],
             "pages/*":["pages/*"],
-            "three/*": ["./node_modules/@types/three/*"]
+            "three/*": ["./node_modules/@types/three/*"],
+            "three/webgpu": ["./node_modules/three/build/three.webgpu.min.js"]
+            
         },
         "lib": [
             "ES2021",
@@ -27,7 +29,7 @@
         ],
     },
     "include": ["src"],
-    // "exclude": [
-    //     "./src/login.ts",
-    // ]
+    "exclude": [
+        "node_modules",
+    ]
 }

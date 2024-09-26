@@ -21,6 +21,14 @@ export class Loader {
         this.loader_gltf = new GLTFLoader();
         this.loader_drc = new DRACOLoader();
 
+
+        // 设置 dracoLoader 应该去哪个目录里查找 解压(解码) 文件
+        this.loader_drc.setDecoderPath('../../public/draco/')
+        // 使用兼容性强的draco_decoder.js解码器
+        this.loader_drc.setDecoderConfig({ type: "js" }); 
+        // 将 dracoLoader 传递给 gltfLoader，供 gltfLoader 使用
+        this.loader_gltf.setDRACOLoader(this.loader_drc)
+
         // 创建光源
         this.light()
     }
@@ -41,15 +49,14 @@ export class Loader {
 
     // 处理模型加载
     private async _loadScenesModel(data: any) { 
-        return new Promise(resolve => { 
-            // 设置 dracoLoader 应该去哪个目录里查找 解压(解码) 文件
-            this.loader_drc.setDecoderPath('../../public/draco/')
-            // 将 dracoLoader 传递给 gltfLoader，供 gltfLoader 使用
-            this.loader_gltf.setDRACOLoader(this.loader_drc)
-                   
+        return new Promise(resolve => {
             // 加载模型
-            this.loader_gltf.load(data, (gltf) => { 
+            this.loader_gltf.load(data, (gltf) => {
                 const group = gltf.scene;
+                group.traverse(child => { 
+                    console.log(child);
+                    
+                })
                 
                 const box = new THREE.Box3().setFromObject(group)
                 const center = box.getCenter(new THREE.Vector3())
@@ -64,13 +71,12 @@ export class Loader {
                 this._scene.add(group);
                 
                 resolve(data);
-            }, (val) => { 
+            }, (val) => {
                 const loadProgress = (val.loaded / val.total) * 100
                 console.log(loadProgress);
                 
-            })
-
-        })
+            });
+        });
     }
 
     light() { 
