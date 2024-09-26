@@ -12,6 +12,7 @@ export class Core{
     scene!: THREE.Scene;
     camera!: THREE.PerspectiveCamera;
     mesh!: THREE.Mesh;
+    material!: THREE.MeshStandardMaterial;
     renderer!: THREE.WebGLRenderer;
     orbit_controls!: OrbitControls;
     clock!: THREE.Clock;
@@ -26,13 +27,15 @@ export class Core{
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera();
         this.mesh = new THREE.Mesh();
-        this.renderer = new THREE.WebGLRenderer();
+        this.material = new THREE.MeshStandardMaterial();
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); //设置抗锯齿
         this.orbit_controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.clock = new THREE.Clock();
         this.stats = new Stats();
         this._loader = new Loader({
             scene: this.scene,
             mesh: this.mesh,
+            material: this.material,
             renderer: this.renderer,
         }); 
 
@@ -90,7 +93,7 @@ export class Core{
         // 更新相机投影矩阵
         this.camera.updateProjectionMatrix();
         //
-        // this.renderer.setPixelRatio(this._opts.devicePixelRatio = 1);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
     }
 
     // 添加物体
