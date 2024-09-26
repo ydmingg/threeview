@@ -13,11 +13,8 @@ const threeView = new ThreeView(app, {
 const data = '../module/suzanne.gltf'
 threeView.setData(data);
 
-// 加载FPS帧率
+// 加载视图工具
 threeView.windowWiew({
-    fps: true,
-    
-
+    fps: true, // 开启fps帧率
     
 });
-
