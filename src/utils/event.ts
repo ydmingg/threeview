@@ -1,6 +1,6 @@
 import Evter from "evter";
 
-export class EventEmitter {
+export class Event {
     private _evter: Evter;
 
     constructor() { 

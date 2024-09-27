@@ -34,9 +34,11 @@ export class Core{
         this.stats = new Stats();
         this._loader = new Loader({
             scene: this.scene,
+            camera: this.camera,
             mesh: this.mesh,
             material: this.material,
             renderer: this.renderer,
+            controls: this.orbit_controls
         }); 
 
         this._initScene();
@@ -45,13 +47,14 @@ export class Core{
         
         // 动态更新视图
         window.addEventListener('resize', this._resizeWindow.bind(this)) 
+        
 
     }
 
     // 初始化场景
     private _initScene() { 
         // 设置场景背景颜色
-        this.scene.background = new THREE.Color("#666");
+        this.scene.background = new THREE.Color("#fff");
     }
 
     // 初始化相机
