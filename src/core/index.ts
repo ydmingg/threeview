@@ -77,10 +77,14 @@ export class Core{
     private _initRender() { 
         // 开启阴影效果
         this.renderer.shadowMap.enabled = true
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
         // 设置渲染器颜色空间
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         // 设置渲染器像素比
         this.renderer.setSize(this._opts.width, this._opts.height);
+        // 设置色调隐射
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping
+        
         // 将元素添加到容器中
         this._container.appendChild(this.renderer.domElement);
     }

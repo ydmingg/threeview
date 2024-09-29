@@ -10,8 +10,8 @@ const threeView = new ThreeView(app, {
 });
 
 // 渲染数据
-// const data = '../module/suzanne.fbx'
-const data = 'https://static.funxdata.com/view/skphouse.fbx'
+const data = '../module/suzanne.gltf'
+// const data = 'https://static.funxdata.com/view/skphouse.fbx'
 threeView.setData(data);
 
 // 加载视图工具

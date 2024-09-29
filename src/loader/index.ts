@@ -99,31 +99,81 @@ export class Loader {
                     default:
                         break;
                 }
+                
 
-                // const ambientLight = new THREE.AmbientLight(0xffffff, 1); // 白光，强度为1
-                // this._scene.add(ambientLight);
-                // const dirLight = new THREE.DirectionalLight('rgb(253,253,253)', 5);
-                // dirLight.position.set(10, 10, 5); // 根据需要自行调整位置
-                // this._scene.add(dirLight);
-
+                
+                //THREE.sRGBEncoding;
+                this._renderer.outputColorSpace = THREE.SRGBTransfer; 
+                
                 // 递归遍历所有模型节点
                 model.traverse((child) => {
-                    if (child instanceof THREE.Mesh) {
-                        // 模型开启阴影
+                    // 判断是否是网格模型
+                    if (child instanceof THREE.Mesh  && child.material instanceof THREE.MeshStandardMaterial) {
+                        // 设置金属度
+                        // child.material.metalness = 0.9
+                        // 模型双面渲染
+                        child.material.side = THREE.DoubleSide; 
+                        // 光照阴影
                         child.castShadow = true
+                        // 接收阴影
                         child.receiveShadow = true;
+                        child.frustumCulled = false;
                         
                         // 模型自发光
-                        child.material.emissive = child.material.color;
-                        child.material.emissiveMap = child.material.map;
-
+                        // child.material.emissive = child.material.color;
+                        // child.material.emissiveMap = child.material.map;
+                        console.log('Material:', child.material);
+                        
                     }
                 })
 
                
 
                 // 计算场景中对象的包围盒大小，并根据大小和中心点调整相机和控制器的位置。
-                this.fitOnScreen(model)
+                // 创建包围盒
+                const box3 = new THREE.Box3().setFromObject(model);
+                // 包围盒大小
+                const boxSize = box3.getSize(new THREE.Vector3()).length();
+                // 包围盒中心点
+                const boxCenter = box3.getCenter(new THREE.Vector3());
+                
+                // 添加包围盒的辅助对象
+                const helper = new THREE.Box3Helper(box3, 0xffff00);
+                this._scene.add(helper);
+
+                // 根据给定的尺寸，计算相机的位置和截锥体的近平面和远平面。
+                this.frameArea({
+                    sizeToFitOnScreen: boxSize*1.5,
+                    boxSize: boxSize,
+                    boxCenter: boxCenter,
+                })
+
+                //////
+                this._controls.maxDistance = boxSize * 10;
+                // 控制器将以 boxCenter 为中心进行旋转和缩放操作。
+                this._controls.target.copy(boxCenter);
+                // 摄像机的变换发生任何手动改变后调用
+                this._controls.update();
+
+                // 添加环境光
+                const ambientLight = new THREE.AmbientLight(0xffffff, 6.5);
+                this._scene.add(ambientLight);
+                // 添加半球光
+                // const lightness = new THREE.HemisphereLight(0xffffff, 0x444444);
+                // lightness.position.set(0, 20, 0);
+                // this._scene.add(lightness)
+                // 添加平行光
+                // const dirLight = new THREE.DirectionalLight(0xffffff, 5);
+                // dirLight.position.set(0.25, 3, -2.25); 
+                // this._scene.add(dirLight)
+                // dirLight.castShadow = true
+                // dirLight.shadow.camera.far = 15
+                // dirLight.shadow.mapSize.set(1024, 1024)
+                // const directionalLightCameraHelper = new THREE.CameraHelper(dirLight.shadow.camera)
+                // this._scene.add(directionalLightCameraHelper)
+                // dirLight.shadow.normalBias = 0.05
+
+
 
                 model.updateMatrixWorld(true);
                 // 将包围盒添加到场景
@@ -195,32 +245,6 @@ export class Loader {
 		// this._renderer.shadowMap.type = THREE.PCFSoftShadowMap
     }
 
-    fitOnScreen(model: any) { 
-        // 创建包围盒
-        const box3 = new THREE.Box3().setFromObject(model);
-        // 包围盒大小
-        const boxSize = box3.getSize(new THREE.Vector3()).length();
-        // 包围盒中心点
-        const boxCenter = box3.getCenter(new THREE.Vector3());
-        
-        // 添加包围盒的辅助对象
-        const helper = new THREE.Box3Helper(box3, 0xffff00);
-        this._scene.add(helper);
-
-        // 根据给定的尺寸，计算相机的位置和截锥体的近平面和远平面。
-        this.frameArea({
-            sizeToFitOnScreen: boxSize*1.5,
-            boxSize: boxSize,
-            boxCenter: boxCenter,
-        })
-
-        this._controls.maxDistance = boxSize * 10;
-        // 控制器将以 boxCenter 为中心进行旋转和缩放操作。
-        this._controls.target.copy(boxCenter);
-        // 摄像机的变换发生任何手动改变后调用
-        this._controls.update();
-    }
-
     frameArea({
         sizeToFitOnScreen,
         boxSize,
@@ -253,6 +277,7 @@ export class Loader {
         this._camera.updateProjectionMatrix();
         // 将相机的视角对准包围盒的中心
         this._camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
+
 
     }
 
