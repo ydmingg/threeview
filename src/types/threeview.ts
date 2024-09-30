@@ -7,7 +7,7 @@ export interface CoreOptions {
 
 export type windowViewPlugin = {
     fps?: boolean;
-    // stats?: boolean;
+    box3?: boolean;
     // orbit?: boolean;
     // drag?: boolean;
     // zoom?: boolean;

@@ -12,8 +12,8 @@ export default class ThreeView {
     }
 
     // 设置数据
-    setData(data: any) { 
-        this._core.setData(data)
+    setData(options: any) { 
+        this._core.setData(options)
     }
 
     // 设置FPS

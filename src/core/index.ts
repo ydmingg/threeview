@@ -32,13 +32,15 @@ export class Core{
         this.orbit_controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.clock = new THREE.Clock();
         this.stats = new Stats();
+
         this._loader = new Loader({
             scene: this.scene,
             camera: this.camera,
             mesh: this.mesh,
             material: this.material,
             renderer: this.renderer,
-            controls: this.orbit_controls
+            controls: this.orbit_controls,
+            clock: this.clock
         }); 
 
         this._initScene();
@@ -47,8 +49,7 @@ export class Core{
         
         // 动态更新视图
         window.addEventListener('resize', this._resizeWindow.bind(this)) 
-        
-
+    
     }
 
     // 初始化场景
@@ -68,21 +69,25 @@ export class Core{
         // 相机远裁剪面
         this.camera.far = 1000;
         // 相机位置
-        this.camera.position.set(0, 0, 5)
+        this.camera.position.set(0, 0, 1)
+        this.camera.up.set (0.0, 1.0, 0.0);
+        this.camera.lookAt(new THREE.Vector3(0.0, 0.0, 0.0));
         // 更新相机的投影矩阵
         this.camera.updateProjectionMatrix();
+
+        // 添加光线
+        this.light();
     }
 
     // 初始化渲染
     private _initRender() { 
         // 开启阴影效果
         this.renderer.shadowMap.enabled = true
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
         // 设置渲染器颜色空间
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         // 设置渲染器像素比
         this.renderer.setSize(this._opts.width, this._opts.height);
-        // 设置色调隐射
+        // 设置色调映射
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping
         
         // 将元素添加到容器中
@@ -104,7 +109,7 @@ export class Core{
     }
 
     // 添加物体
-    setData(data: any) { 
+    setData(options: any) { 
         // 创建循环动画
         this.renderer.setAnimationLoop(() => {
             // 循环调用函数中的update()方法，来刷新时间
@@ -113,11 +118,13 @@ export class Core{
             this.renderer.render(this.scene, this.camera);
             // 更新轨道控制器
             this.orbit_controls.update();
+
+
             
         });
 
         // 加载模型、场景和材质等
-        this._loader.loadScenes(data)
+        this._loader.loadScenes(options)
 
     }
 
@@ -125,16 +132,32 @@ export class Core{
     windowWiew(data: windowViewPlugin) {
         for (const key in data) {
             // FPS帧率
-            if (key === "fps") { 
+            if (key === "fps" && data[key]) { 
                 // 设置监视器面板，传入面板id（0:fps, 1: ms, 2: mb, 3+: custom）
                 this.stats.showPanel(1); 
                 // 将监视器添加到页面中
                 this._container.appendChild(this.stats.dom);
             }
-            // 
-            
+            // 包围盒
+            if (key === "box3" && data[key]) { 
+                this._loader.isbox3Helper = true;
+            }
         }
 
+    }
+
+    light() {
+        // 添加环境光
+        const ambientLight = new THREE.AmbientLight(0x888888, 1);
+        this.scene.add(ambientLight);
+        // 添加平行光
+        const dirLight = new THREE.DirectionalLight(0x888888, 1);
+        dirLight.position.set (0.0, 0.0, 1.0);
+        this.scene.add(dirLight)
+
+        const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0); 
+        this.scene.add(hemisphereLight);
+        
     }
 
 }
