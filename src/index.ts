@@ -1,8 +1,7 @@
 import ThreeView from "./threeview/init";
 
-const app = document.getElementById("app") as HTMLDivElement;
-
 // 实例化threeview
+const app = document.getElementById("app") as HTMLDivElement;
 const threeView = new ThreeView(app, {
     width: app.offsetWidth,
     height: app.offsetHeight,

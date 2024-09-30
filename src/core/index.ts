@@ -55,7 +55,7 @@ export class Core{
     // 初始化场景
     private _initScene() { 
         // 设置场景背景颜色
-        this.scene.background = new THREE.Color("#fff");
+        this.scene.background = new THREE.Color("#333");
     }
 
     // 初始化相机

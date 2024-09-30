@@ -15,6 +15,7 @@ export class Loader {
     private _renderer: THREE.WebGLRenderer
     private _controls: OrbitControls
     private _clock: THREE.Clock
+    private _loader_drc: DRACOLoader
     
     loaderMap: {}
     isbox3Helper: boolean = false
@@ -33,6 +34,10 @@ export class Loader {
         // 取出core中定义的控制器
         this._controls = obj.controls
         this._clock = obj.clock
+
+        // 创建解压器
+        this._loader_drc = new DRACOLoader();
+        
         // 
         this.loaderMap = {
             'glb': new GLTFLoader(),
@@ -71,10 +76,14 @@ export class Loader {
                 let model: any;
                 switch (type) { 
                     case 'glb':
-                        model = gltf.scene
-                        break;
                     case 'gltf':
                         model = gltf.scene
+                        // 设置 dracoLoader 应该去哪个目录里查找 解压(解码) 文件
+                        this._loader_drc.setDecoderPath('../../public/draco/')
+                        // 使用兼容性强的draco_decoder.js解码器
+                        this._loader_drc.setDecoderConfig({ type: "js" }); 
+                        // 将 dracoLoader 传递给 gltfLoader，供 gltfLoader 使用
+                        loaders.setDRACOLoader(this._loader_drc)
                         break;
                     case 'fbx':
                         model = gltf
@@ -199,8 +208,8 @@ export class Loader {
         const clock = new THREE.Clock();
 
         // 创建动画
-        const mixer = new THREE.AnimationMixer(obj)
-        const animation = mixer.clipAction(obj.animations[0]);
+        // const mixer = new THREE.AnimationMixer(obj)
+        // const animation = mixer.clipAction(obj.animations[0]);
         
         
     
