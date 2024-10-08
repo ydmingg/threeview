@@ -9,8 +9,8 @@ const threeView = new ThreeView(app, {
 });
 
 // 渲染数据
-const data = '../module/battlecry.fbx' 
-// const data = '../module/suzanne.gltf'
+// const data = '../module/battlecry-an.fbx' 
+const data = '../module/suzanne.gltf'
 // const data = 'https://static.funxdata.com/view/skphouse.fbx'
 threeView.setData(data);
 

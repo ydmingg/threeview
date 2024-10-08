@@ -55,7 +55,7 @@ export class Core{
     // 初始化场景
     private _initScene() { 
         // 设置场景背景颜色
-        this.scene.background = new THREE.Color("#333");
+        this.scene.background = new THREE.Color("#a0a0a0");
     }
 
     // 初始化相机
@@ -118,9 +118,6 @@ export class Core{
             this.renderer.render(this.scene, this.camera);
             // 更新轨道控制器
             this.orbit_controls.update();
-
-
-            
         });
 
         // 加载模型、场景和材质等
@@ -152,12 +149,17 @@ export class Core{
         this.scene.add(ambientLight);
         // 添加平行光
         const dirLight = new THREE.DirectionalLight(0x888888, 1);
-        dirLight.position.set (0.0, 0.0, 1.0);
+        dirLight.position.set (5,5,5);
         this.scene.add(dirLight)
-
+        // 添加半球光
         const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0); 
         this.scene.add(hemisphereLight);
         
+        // 添加点光源
+        const pointLight = new THREE.PointLight(0xffffff, 1)
+        pointLight.position.set(-5, 5, 5)
+        this.scene.add(pointLight)
+
     }
 
 }

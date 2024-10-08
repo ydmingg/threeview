@@ -103,9 +103,9 @@ export class Loader {
                     // 判断是否是网格模型
                     if (child instanceof THREE.Mesh ) {
                         // 设置粗糙度
-                        child.material.roughness = 0.5;
+                        // child.material.roughness = 0.1;
                         // 设置金属度
-                        child.material.metalness = 0.4;
+                        child.material.metalness = 0.5;
                         
                         // 模型双面渲染
                         child.material.side = THREE.DoubleSide; 
@@ -118,10 +118,11 @@ export class Loader {
                         // 模型自发光
                         child.material.emissive = child.material.color;
                         child.material.emissiveMap = child.material.map;
-                        console.log('Material:', child.material);
+                        console.log('model:', child);
                         
                     }
                 })
+                
 
                 // 创建包围盒
                 const box3 = new THREE.Box3().setFromObject(model);
@@ -151,7 +152,9 @@ export class Loader {
 
                 // 模型动画
                 this.animation(model);
-                
+
+                // 将模型添加到场景中
+                this._scene.add(model);
                 resolve(gltf.scene);
             }, (val) => {
                 const loadProgress = Math.floor((val.loaded / val.total) * 100)
