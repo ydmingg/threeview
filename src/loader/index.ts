@@ -101,25 +101,41 @@ export class Loader {
                 // 递归遍历所有模型节点
                 model.traverse((child) => {
                     // 判断是否是网格模型
-                    if (child instanceof THREE.Mesh ) {
-                        // 设置粗糙度
-                        // child.material.roughness = 0.1;
-                        // 设置金属度
-                        child.material.metalness = 0.5;
-                        
-                        // 模型双面渲染
-                        child.material.side = THREE.DoubleSide; 
-                        // 光照阴影
+                    if (child instanceof THREE.Mesh) {
+                        // 开启光照阴影和接受阴影
                         child.castShadow = true
-                        // 接收阴影
                         child.receiveShadow = true;
-                        child.frustumCulled = false;
-                        
-                        // 模型自发光
-                        child.material.emissive = child.material.color;
-                        child.material.emissiveMap = child.material.map;
-                        console.log('model:', child);
-                        
+                        // 模型双面渲染
+                        child.material.side = THREE.DoubleSide
+
+                        if (child.material) {
+                            // 调整有纹理时的材质
+                            if (child.material.map) {
+                                console.log("有纹理");
+                                child.material.metalness = 0.5 // 设置金属度
+                                child.material.roughness = 0.5 // 设置粗糙度
+                                // 设置模型自发光效果
+                                child.material.emissive = child.material.color;
+                                child.material.emissiveMap = child.material.map;
+                            } else { 
+                                console.log("没有纹理");
+                                // 调整没有纹理时的材质
+                                child.material = new THREE.MeshStandardMaterial({
+                                    color: child.material.color, // 设置模型自身颜色
+                                    metalness: 0.5, // 设置金属度
+                                    roughness: 0.7, // 设置粗糙度
+                                    // emissive: new THREE.Color(0x000000), // 设置自发光
+                                    // emissiveIntensity: 1, // 设置自发光强度
+                                })
+                            }
+                        } else { 
+                            // 设置没有材质的网格
+                            child.material = new THREE.MeshStandardMaterial({
+                                color: 0x888888, // 设置颜色
+                                metalness: 0.5, // 设置金属度
+                                roughness: 0.7, // 设置粗糙度
+                            })
+                        }
                     }
                 })
                 

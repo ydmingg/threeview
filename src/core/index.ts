@@ -149,17 +149,17 @@ export class Core{
         this.scene.add(ambientLight);
         // 添加平行光
         const dirLight = new THREE.DirectionalLight(0x888888, 1);
-        dirLight.position.set (5,5,5);
+        dirLight.position.set(5, 5, 5);
         this.scene.add(dirLight)
         // 添加半球光
-        const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0); 
+        const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1); 
         this.scene.add(hemisphereLight);
         
         // 添加点光源
         const pointLight = new THREE.PointLight(0xffffff, 1)
         pointLight.position.set(-5, 5, 5)
         this.scene.add(pointLight)
-
+        
     }
 
 }
