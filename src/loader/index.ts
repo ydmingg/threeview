@@ -16,6 +16,7 @@ export class Loader {
     private _controls: OrbitControls
     private _clock: THREE.Clock
     private _loader_drc: DRACOLoader
+    private _sceneGroup: THREE.Group | THREE.Mesh | undefined;
     
     loaderMap: {}
     isbox3Helper: boolean = false
@@ -62,7 +63,6 @@ export class Loader {
         }   
     }
 
-
     // 处理模型加载
     private async _loadScenesModel(data: any) { 
         return new Promise(resolve => {
@@ -73,11 +73,10 @@ export class Loader {
             
             // 加载模型
             loaders.load(data, (gltf) => {
-                let model: any;
                 switch (type) { 
                     case 'glb':
                     case 'gltf':
-                        model = gltf.scene
+                        this._sceneGroup = gltf.scene
                         // 设置 dracoLoader 应该去哪个目录里查找 解压(解码) 文件
                         this._loader_drc.setDecoderPath('../../public/draco/')
                         // 使用兼容性强的draco_decoder.js解码器
@@ -86,20 +85,22 @@ export class Loader {
                         loaders.setDRACOLoader(this._loader_drc)
                         break;
                     case 'fbx':
-                        model = gltf
+                        this._sceneGroup = gltf
                         break;
                     case 'obj':
-                        model = gltf
+                        this._sceneGroup = gltf
                         break;
                     case 'stl':
-                        model = new THREE.Mesh(gltf, this._material);
+                        this._sceneGroup = new THREE.Mesh(gltf, this._material);
                         break;
                     default:
                         break;
                 }
-                
+
+                if (!this._sceneGroup) return;
+
                 // 递归遍历所有模型节点
-                model.traverse((child) => {
+                this._sceneGroup.traverse((child) => {
                     // 判断是否是网格模型
                     if (child instanceof THREE.Mesh) {
                         // 开启光照阴影和接受阴影
@@ -108,23 +109,24 @@ export class Loader {
                         // 模型双面渲染
                         child.material.side = THREE.DoubleSide
 
+
                         if (child.material) {
                             // 调整有纹理时的材质
                             if (child.material.map) {
-                                console.log("有纹理");
+                                // console.log("有纹理");
                                 child.material.metalness = 0.5 // 设置金属度
                                 child.material.roughness = 0.5 // 设置粗糙度
                                 // 设置模型自发光效果
                                 child.material.emissive = child.material.color;
                                 child.material.emissiveMap = child.material.map;
                             } else { 
-                                console.log("没有纹理");
+                                // console.log("没有纹理");
                                 // 调整没有纹理时的材质
                                 child.material = new THREE.MeshStandardMaterial({
                                     color: child.material.color, // 设置模型自身颜色
                                     metalness: 0.5, // 设置金属度
                                     roughness: 0.7, // 设置粗糙度
-                                    // emissive: new THREE.Color(0x000000), // 设置自发光
+                                    // emissive: new THREE.Color(0x222222), // 设置自发光
                                     // emissiveIntensity: 1, // 设置自发光强度
                                 })
                             }
@@ -138,40 +140,16 @@ export class Loader {
                         }
                     }
                 })
-                
 
-                // 创建包围盒
-                const box3 = new THREE.Box3().setFromObject(model);
-                // 包围盒大小
-                const boxSize = box3.getSize(new THREE.Vector3()).length();
-                // 包围盒中心点
-                const boxCenter = box3.getCenter(new THREE.Vector3());
-                // 创建包围盒辅助器
-                if (this.isbox) { 
-                    const box3Helper = new THREE.Box3Helper(box3, 0xff0000)
-                    this._scene.add(box3Helper);
-                }
+                this.moduleFun(this._sceneGroup)
 
-                // 根据给定的尺寸，计算相机的位置和截锥体的近平面和远平面。
-                this.frameArea({
-                    sizeToFitOnScreen: boxSize * 1.5,
-                    boxSize: boxSize,
-                    boxCenter: boxCenter,
-                });
-
-                //  
-                this._controls.maxDistance = boxSize * 10;
-                // 控制器将以 boxCenter 为中心进行旋转和缩放操作。
-                this._controls.target.copy(boxCenter);
-                // 摄像机的变换发生任何手动改变后调用
-                this._controls.update();
-
-                // 模型动画
-                this.animation(model);
+                // 添加动画
+                this.animation(this._sceneGroup)
 
                 // 将模型添加到场景中
-                this._scene.add(model);
+                this._scene.add(this._sceneGroup);
                 resolve(gltf.scene);
+
             }, (val) => {
                 const loadProgress = Math.floor((val.loaded / val.total) * 100)
                 console.log("模型已加载: ", loadProgress + "%");
@@ -180,10 +158,45 @@ export class Loader {
         });
     }
 
+    moduleFun(model: any) { 
+        if (!model) return;
+        // 创建包围盒
+        const box3 = new THREE.Box3().setFromObject(model);
+        // 包围盒大小
+        const boxSize = box3.getSize(new THREE.Vector3()).length();
+        // 包围盒中心点
+        const boxCenter = box3.getCenter(new THREE.Vector3());
+        // 创建包围盒辅助器
+        const box3Helper = new THREE.Box3Helper(box3, 0xff0000)
+        if (this.isbox) { 
+            this._scene.add(box3Helper);
+        }
+
+        box3Helper.rotateY(Math.PI / -2)
+        // model.rotateY(Math.PI / -2); 
+
+
+        // 根据给定的尺寸，计算相机的位置和截锥体的近平面和远平面。
+        this.frameArea({
+            sizeToFitOnScreen: boxSize * 1.5,
+            boxSize: boxSize,
+            boxCenter: boxCenter,
+            model: model
+        });
+
+        //  
+        this._controls.maxDistance = boxSize * 10;
+        // 控制器将以 boxCenter 为中心进行旋转和缩放操作。
+        this._controls.target.copy(boxCenter);
+        // 摄像机的变换发生任何手动改变后调用
+        this._controls.update();
+    }
+
     frameArea({
         sizeToFitOnScreen,
         boxSize,
-        boxCenter
+        boxCenter,
+        model
     }) { 
         // 根据计算出的尺寸将其一半的尺寸作为相机距离物体的距离
         const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
@@ -193,7 +206,7 @@ export class Loader {
         const distance = halfSizeToFitOnScreen / Math.tan(halfFovY);
 
         // 创建一个三维向量
-        const direction = new THREE.Vector3()
+        const direction = new THREE.Vector3(0, 0, 1)
         // 计算两个向量的差值，即从包围盒中心指向相机位置的向量
         const subVectors = direction.subVectors(this._camera.position, boxCenter)
         // 把y轴置零，x z轴不变
@@ -203,22 +216,24 @@ export class Loader {
         
         // 根据距离和中心点，设置相机的位置
         this._camera.position.copy(direction.multiplyScalar(distance).add(boxCenter));
-        
+        // 将相机的视角对准包围盒的中心
+        this._camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
         // 计算近平面值
         this._camera.near = boxSize / 100;
         // 计算远平面值
         this._camera.far = boxSize * 100;
         // 更新相机的投影矩阵
         this._camera.updateProjectionMatrix();
-        // 将相机的视角对准包围盒的中心
-        this._camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
-
-
+        
     }
 
 
     get isbox() { 
         return this.isbox3Helper
+    }
+
+    thisss(obj) {
+        // this._sceneGroup!.rotateY(Math.PI / -2); 
     }
     
     // 添加模型动画
@@ -226,12 +241,36 @@ export class Loader {
         // 创建时钟
         const clock = new THREE.Clock();
 
-        // 创建动画
-        // const mixer = new THREE.AnimationMixer(obj)
-        // const animation = mixer.clipAction(obj.animations[0]);
+        // 动画发生在哪个物体上就绑定哪个 mash
+        const mixer = new THREE.AnimationMixer(obj)
+        // 把该物体需要的动画拿出来
+        console.log(obj);
         
+        const animation = mixer.clipAction(obj.animations[0]);
+
+        // console.log(animation);
         
+
+        //设置只播放一次
+        animation.setLoop(THREE.LoopRepeat, Infinity);
+        // 开始播放
+        const loops = 0;
+        
+        if (loops) { 
+            animation.play()
+        }
     
+        const tick = () => { 
+            if (mixer) { 
+                mixer.update(clock.getDelta());
+            }
+            
+    
+            this._renderer.render(this._scene, this._camera);
+            window.requestAnimationFrame(tick)
+        }
+        tick();
+
     }
 
 

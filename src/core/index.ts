@@ -76,7 +76,7 @@ export class Core{
         this.camera.updateProjectionMatrix();
 
         // 添加光线
-        this.light();
+        this._light();
     }
 
     // 初始化渲染
@@ -106,6 +106,29 @@ export class Core{
         this.camera.updateProjectionMatrix();
         //
         this.renderer.setPixelRatio(window.devicePixelRatio);
+    }
+
+    // 设置灯光
+    private _light() {
+        // 添加环境光
+        const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+        this.scene.add(ambientLight);
+        // 添加平行光
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+        dirLight.position.set(5, 5, 5);
+        dirLight.castShadow = true
+        // dirLight.shadow.camera.near = 1
+        // dirLight.shadow.camera.far = 20
+        this.scene.add(dirLight)
+        // 添加半球光
+        const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2); 
+        this.scene.add(hemisphereLight);
+        // 添加点光源
+        const pointLight = new THREE.PointLight(0xffffff, 10)
+        pointLight.position.set(-5, 5, 5)
+        pointLight.castShadow = true
+        this.scene.add(pointLight)
+
     }
 
     // 添加物体
@@ -143,23 +166,17 @@ export class Core{
 
     }
 
-    light() {
-        // 添加环境光
-        const ambientLight = new THREE.AmbientLight(0x888888, 1);
-        this.scene.add(ambientLight);
-        // 添加平行光
-        const dirLight = new THREE.DirectionalLight(0x888888, 1);
-        dirLight.position.set(5, 5, 5);
-        this.scene.add(dirLight)
-        // 添加半球光
-        const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1); 
-        this.scene.add(hemisphereLight);
+    setModesRotate(options: any) { 
         
-        // 添加点光源
-        const pointLight = new THREE.PointLight(0xffffff, 1)
-        pointLight.position.set(-5, 5, 5)
-        this.scene.add(pointLight)
+        //
+        this._loader.thisss(options)
+        
+
+        
         
     }
+
+
+    
 
 }
