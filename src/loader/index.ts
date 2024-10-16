@@ -17,9 +17,13 @@ export class Loader {
     private _clock: THREE.Clock
     private _loader_drc: DRACOLoader
     private _sceneGroup: THREE.Group | THREE.Mesh | undefined;
+    private _modleAnimate: THREE.AnimationMixer | undefined;
     
     loaderMap: {}
     isbox3Helper: boolean = false
+    modleRotateMap: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 }
+    modleAnimateIndex = 0;
+    modleClipAction: any;
 
     constructor(obj: any) { 
         // 取出core中定义的场景
@@ -47,8 +51,10 @@ export class Loader {
 			'obj': new OBJLoader(),
             'stl': new STLLoader(),
         }
+        
 
     }
+
 
     // 异步加载全部场景和模型
     async loadScenes(data: any) { 
@@ -83,24 +89,31 @@ export class Loader {
                         this._loader_drc.setDecoderConfig({ type: "js" }); 
                         // 将 dracoLoader 传递给 gltfLoader，供 gltfLoader 使用
                         loaders.setDRACOLoader(this._loader_drc)
+                        // 在模型上绑定自带的动画
+                        this._modleAnimate = new THREE.AnimationMixer(gltf.scene)
                         break;
                     case 'fbx':
                         this._sceneGroup = gltf
+                        // 在模型上绑定自带的动画
+                        this._modleAnimate = new THREE.AnimationMixer(gltf)
                         break;
                     case 'obj':
                         this._sceneGroup = gltf
+                        // 在模型上绑定自带的动画
+                        this._modleAnimate = new THREE.AnimationMixer(gltf)
                         break;
                     case 'stl':
                         this._sceneGroup = new THREE.Mesh(gltf, this._material);
+                        // 在模型上绑定自带的动画
+                        this._modleAnimate = new THREE.AnimationMixer(gltf)
                         break;
                     default:
                         break;
                 }
 
-                if (!this._sceneGroup) return;
-
                 // 递归遍历所有模型节点
-                this._sceneGroup.traverse((child) => {
+                this._sceneGroup!.traverse((child) => {
+                    
                     // 判断是否是网格模型
                     if (child instanceof THREE.Mesh) {
                         // 开启光照阴影和接受阴影
@@ -144,12 +157,10 @@ export class Loader {
                 this.moduleFun(this._sceneGroup)
 
                 // 添加动画
-                this.animation(this._sceneGroup)
+                this.animation(type === "glb" || "gltf" ? gltf : this._sceneGroup)
 
                 // 将模型添加到场景中
-                this._scene.add(this._sceneGroup);
-                resolve(gltf.scene);
-
+                this._scene.add(this._sceneGroup!);
             }, (val) => {
                 const loadProgress = Math.floor((val.loaded / val.total) * 100)
                 console.log("模型已加载: ", loadProgress + "%");
@@ -168,12 +179,16 @@ export class Loader {
         const boxCenter = box3.getCenter(new THREE.Vector3());
         // 创建包围盒辅助器
         const box3Helper = new THREE.Box3Helper(box3, 0xff0000)
-        if (this.isbox) { 
+        if (this.changeBox3box) { 
             this._scene.add(box3Helper);
         }
-
-        box3Helper.rotateY(Math.PI / -2)
-        // model.rotateY(Math.PI / -2); 
+        
+        box3Helper.rotateX(this.changeSetModlseRotate.x);
+        box3Helper.rotateY(this.changeSetModlseRotate.y);
+        box3Helper.rotateZ(this.changeSetModlseRotate.z);
+        model.rotateX(this.changeSetModlseRotate.x); 
+        model.rotateY(this.changeSetModlseRotate.y); 
+        model.rotateZ(this.changeSetModlseRotate.z); 
 
 
         // 根据给定的尺寸，计算相机的位置和截锥体的近平面和远平面。
@@ -228,48 +243,44 @@ export class Loader {
     }
 
 
-    get isbox() { 
+    get changeBox3box() { 
         return this.isbox3Helper
     }
-
-    thisss(obj) {
-        // this._sceneGroup!.rotateY(Math.PI / -2); 
+    get changeSetModlseRotate() { 
+        return this.modleRotateMap
     }
     
     // 添加模型动画
     animation(obj) { 
         // 创建时钟
         const clock = new THREE.Clock();
-
-        // 动画发生在哪个物体上就绑定哪个 mash
-        const mixer = new THREE.AnimationMixer(obj)
-        // 把该物体需要的动画拿出来
-        console.log(obj);
         
-        const animation = mixer.clipAction(obj.animations[0]);
-
-        // console.log(animation);
-        
-
-        //设置只播放一次
-        animation.setLoop(THREE.LoopRepeat, Infinity);
-        // 开始播放
-        const loops = 0;
-        
-        if (loops) { 
-            animation.play()
-        }
-    
-        const tick = () => { 
-            if (mixer) { 
-                mixer.update(clock.getDelta());
-            }
+        obj.animations.forEach((anima, index) => {
+            this.modleClipAction = this._modleAnimate!.clipAction(anima);
+            this.modleAnimateIndex = index
             
-    
+        });
+        const tick = () => { 
+            if (this._modleAnimate) { 
+                this._modleAnimate.update(clock.getDelta());
+            }
+
             this._renderer.render(this._scene, this._camera);
             window.requestAnimationFrame(tick)
         }
         tick();
+
+    }
+
+    modleAnimateChild(data?: number) {
+        if (data === this.modleAnimateIndex || !data) { +
+            // 重置动画
+            this.modleClipAction.reset();  
+            // 开始播放动画
+            this.modleClipAction.play()
+            //不循环播放
+            this.modleClipAction.loop = THREE.LoopOnce; 
+        } 
 
     }
 

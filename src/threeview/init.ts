@@ -22,18 +22,16 @@ export default class ThreeView {
     }
 
     // 设置模型旋转轴
-    setModes(obj: any) { 
+    setModesRotate(obj: any) { 
         const { rotate } = obj
-        this._core.setModesRotate(rotate)
+        this._core.setModesRotate(obj)
 
     }
     
     
     // 播放动画
-    play() { 
-        // this._core.play()
-        console.log("播放动画");
-        
+    setModesAnimate(num?: number) { 
+        this._core.setModesAnimate(num);
     }
 
 

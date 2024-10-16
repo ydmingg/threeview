@@ -166,15 +166,23 @@ export class Core{
 
     }
 
-    setModesRotate(options: any) { 
-        
-        //
-        this._loader.thisss(options)
-        
+    setModesAnimate(data) { 
+        this._loader.modleAnimateChild(data)
+    }
 
-        
+    setModesRotate(obj) { 
+        const angle = {
+            x: obj.x * Math.PI / 180,
+            y: obj.y * Math.PI / 180,
+            z: obj.z * Math.PI / 180,
+        }
+        this._loader.modleRotateMap = angle;
         
     }
+
+    
+
+
 
 
     

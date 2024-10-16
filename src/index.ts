@@ -17,7 +17,7 @@ const data = '../module/001.glb'
 // const data = '../module/suzanne.gltf'
 // const data = '../module/003.fbx'
 // const data = 'https://static.funxdata.com/view/skphouse.fbx'
-threeView.setData(data);
+const datas = threeView.setData(data);
 
 // 加载视图工具
 threeView.windowWiew({
@@ -27,11 +27,25 @@ threeView.windowWiew({
 });
 
 // 设置模型旋转轴
-threeView.setModes({
-    rotate: { x: 0, y: -45, z: 0 },
-    
-});
+threeView.setModesRotate({ x: 0, y: -90, z: 0 });
 
 // 播放动画
-threeView.play();
+// threeView.setModesAnimate(0);
 
+const button = document.createElement("button");
+button.innerHTML = "开始动画";
+const oPopup = document.querySelector("#popup") as HTMLDivElement;
+oPopup.style.position = "absolute";
+oPopup.style.top = "40px";
+oPopup.style.right = "40px";
+button.style.padding = "10px 20px";
+button.style.background = "#f0da62";
+button.style.borderRadius = "5px";
+button.style.cursor = "pointer";
+button.style.userSelect = "none";
+oPopup.appendChild(button);
+
+button.addEventListener("click", () => { 
+    threeView.setModesAnimate();
+    
+})
