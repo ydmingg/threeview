@@ -166,8 +166,8 @@ export class Core{
 
     }
 
-    setModesAnimate(data) { 
-        this._loader.modleAnimateChild(data)
+    setModesAnimate(child: number, config?: any) { 
+        this._loader.modleAnimateChild(child, config)
     }
 
     setModesRotate(obj) { 

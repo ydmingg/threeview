@@ -46,6 +46,6 @@ button.style.userSelect = "none";
 oPopup.appendChild(button);
 
 button.addEventListener("click", () => { 
-    threeView.setModesAnimate();
+    threeView.setModesAnimate(1, {iterationCount:1, speed:1});
     
 })

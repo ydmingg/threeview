@@ -28,10 +28,9 @@ export default class ThreeView {
 
     }
     
-    
-    // 播放动画
-    setModesAnimate(num?: number) { 
-        this._core.setModesAnimate(num);
+    // 设置模型播放动画
+    setModesAnimate(child: number, config?: {iterationCount:any, speed:any}) { 
+        this._core.setModesAnimate(child, config);
     }
 
 

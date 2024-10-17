@@ -254,7 +254,7 @@ export class Loader {
     animation(obj) { 
         // 创建时钟
         const clock = new THREE.Clock();
-        
+
         obj.animations.forEach((anima, index) => {
             this.modleClipAction = this._modleAnimate!.clipAction(anima);
             this.modleAnimateIndex = index
@@ -272,14 +272,45 @@ export class Loader {
 
     }
 
-    modleAnimateChild(data?: number) {
-        if (data === this.modleAnimateIndex || !data) { +
+    modleAnimateChild(child: number, config?: any) {
+        // const { child, iterationCount, speed } = data
+        let iterationCount,
+            speed; 
+        
+        if (!config || JSON.stringify(config) === '{}') {
+            iterationCount = undefined;
+            speed = undefined;
+
+            // 设置对象不能为空
+            if (JSON.stringify(config) === '{}') {
+                throw new Error("参数错误：请传入正确参数");
+            }
+        } else { 
+            iterationCount = config.iterationCount;
+            speed = config.speed;
+        }
+        
+
+        // 判断播放哪个动画
+        if (child-1 === this.modleAnimateIndex) { 
             // 重置动画
             this.modleClipAction.reset();  
             // 开始播放动画
             this.modleClipAction.play()
-            //不循环播放
-            this.modleClipAction.loop = THREE.LoopOnce; 
+
+            // 动画循环方式
+            if (iterationCount && iterationCount === 1) {
+                this.modleClipAction.loop = THREE.LoopOnce; 
+            } else if (iterationCount && iterationCount === "infinite") { 
+                this.modleClipAction.loop = THREE.LoopRepeat;
+            }
+
+            // 播放速度
+            if (iterationCount && (speed || speed === 0)) { 
+                this.modleClipAction.timeScale = speed
+            }
+            
+            
         } 
 
     }
