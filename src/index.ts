@@ -14,6 +14,7 @@ const threeView = new ThreeView(app, {
 // const data = '../module/an-girl.fbx'
 // const data = '../module/xxxxx.fbx'
 const data = '../module/001.glb'
+// const data = '../module/020.glb'
 // const data = '../module/suzanne.gltf'
 // const data = '../module/003.fbx'
 // const data = 'https://static.funxdata.com/view/skphouse.fbx'
@@ -32,20 +33,28 @@ threeView.setModesRotate({ x: 0, y: -90, z: 0 });
 // 播放动画
 // threeView.setModesAnimate(0);
 
-const button = document.createElement("button");
-button.innerHTML = "开始动画";
+
+
+// 动画测试
 const oPopup = document.querySelector("#popup") as HTMLDivElement;
 oPopup.style.position = "absolute";
+oPopup.style.display = "flex";
+oPopup.style.flexDirection = "column";
+oPopup.style.gap = "10px";
 oPopup.style.top = "40px";
 oPopup.style.right = "40px";
-button.style.padding = "10px 20px";
-button.style.background = "#f0da62";
-button.style.borderRadius = "5px";
-button.style.cursor = "pointer";
-button.style.userSelect = "none";
-oPopup.appendChild(button);
 
-button.addEventListener("click", () => { 
-    threeView.setModesAnimate(1, {iterationCount:1, speed:1});
-    
-})
+for (let i = 0; i < 2; i++) {
+    const button = document.createElement("button");
+    button.innerHTML = "动画"+(i+1)+"";
+    button.style.padding = "10px 20px";
+    button.style.background = "#f0da62";
+    button.style.borderRadius = "5px";
+    button.style.cursor = "pointer";
+    button.style.userSelect = "none";
+    oPopup.appendChild(button);
+    button.addEventListener("click", () => { 
+        threeView.setModesAnimate(i, { iterationCount: 1, speed: 1 });
+        
+    })
+}

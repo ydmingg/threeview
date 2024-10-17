@@ -141,6 +141,9 @@ export class Core{
             this.renderer.render(this.scene, this.camera);
             // 更新轨道控制器
             this.orbit_controls.update();
+
+            // 动画循环方式
+            this._loader.modleAnimate?.update(this.clock.getDelta())
         });
 
         // 加载模型、场景和材质等
@@ -171,12 +174,7 @@ export class Core{
     }
 
     setModesRotate(obj) { 
-        const angle = {
-            x: obj.x * Math.PI / 180,
-            y: obj.y * Math.PI / 180,
-            z: obj.z * Math.PI / 180,
-        }
-        this._loader.modleRotateMap = angle;
+        this._loader.modleRotateMap = obj;
         
     }
 

@@ -17,12 +17,12 @@ export class Loader {
     private _clock: THREE.Clock
     private _loader_drc: DRACOLoader
     private _sceneGroup: THREE.Group | THREE.Mesh | undefined;
-    private _modleAnimate: THREE.AnimationMixer | undefined;
+    modleAnimate: THREE.AnimationMixer | undefined;
     
     loaderMap: {}
     isbox3Helper: boolean = false
     modleRotateMap: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 }
-    modleAnimateIndex = 0;
+    modleAnimateIndex: Array<any> = [];
     modleClipAction: any;
 
     constructor(obj: any) { 
@@ -90,77 +90,62 @@ export class Loader {
                         // 将 dracoLoader 传递给 gltfLoader，供 gltfLoader 使用
                         loaders.setDRACOLoader(this._loader_drc)
                         // 在模型上绑定自带的动画
-                        this._modleAnimate = new THREE.AnimationMixer(gltf.scene)
+                        this.modleAnimate = new THREE.AnimationMixer(gltf.scene)
                         break;
                     case 'fbx':
                         this._sceneGroup = gltf
                         // 在模型上绑定自带的动画
-                        this._modleAnimate = new THREE.AnimationMixer(gltf)
+                        this.modleAnimate = new THREE.AnimationMixer(gltf)
                         break;
                     case 'obj':
                         this._sceneGroup = gltf
                         // 在模型上绑定自带的动画
-                        this._modleAnimate = new THREE.AnimationMixer(gltf)
+                        this.modleAnimate = new THREE.AnimationMixer(gltf)
                         break;
-                    case 'stl':
-                        this._sceneGroup = new THREE.Mesh(gltf, this._material);
-                        // 在模型上绑定自带的动画
-                        this._modleAnimate = new THREE.AnimationMixer(gltf)
-                        break;
+                    // case 'stl':
+                    //     this._sceneGroup = new THREE.Mesh(gltf, this._material);
+                    //     // 在模型上绑定自带的动画
+                    //     this.modleAnimate = new THREE.AnimationMixer(gltf)
+                    //     break;
                     default:
                         break;
                 }
 
-                // 递归遍历所有模型节点
-                this._sceneGroup!.traverse((child) => {
-                    
-                    // 判断是否是网格模型
-                    if (child instanceof THREE.Mesh) {
-                        // 开启光照阴影和接受阴影
-                        child.castShadow = true
-                        child.receiveShadow = true;
-                        // 模型双面渲染
-                        child.material.side = THREE.DoubleSide
+                if (this._sceneGroup) {
+                    // 递归遍历所有模型节点
+                    this._sceneGroup.traverse((child) => {
+                        // 判断是否是网格模型
+                        if (child instanceof THREE.Mesh) {
+                            // 开启光照阴影和接受阴影
+                            child.castShadow = true
+                            // child.receiveShadow = true;
+                            // 模型双面渲染
+                            child.material.side = THREE.DoubleSide
+                            // 取消模型裁剪
+                            child.frustumCulled = false;
 
-
-                        if (child.material) {
-                            // 调整有纹理时的材质
-                            if (child.material.map) {
-                                // console.log("有纹理");
-                                child.material.metalness = 0.5 // 设置金属度
-                                child.material.roughness = 0.5 // 设置粗糙度
-                                // 设置模型自发光效果
-                                child.material.emissive = child.material.color;
-                                child.material.emissiveMap = child.material.map;
-                            } else { 
-                                // console.log("没有纹理");
-                                // 调整没有纹理时的材质
-                                child.material = new THREE.MeshStandardMaterial({
-                                    color: child.material.color, // 设置模型自身颜色
-                                    metalness: 0.5, // 设置金属度
-                                    roughness: 0.7, // 设置粗糙度
-                                    // emissive: new THREE.Color(0x222222), // 设置自发光
-                                    // emissiveIntensity: 1, // 设置自发光强度
-                                })
+                            // 处理材质可能是数组的情况
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(mat => {
+                                    this.updateMaterial(mat,child);
+                                });
+                            } else {
+                                this.updateMaterial(child.material,child);
                             }
-                        } else { 
-                            // 设置没有材质的网格
-                            child.material = new THREE.MeshStandardMaterial({
-                                color: 0x888888, // 设置颜色
-                                metalness: 0.5, // 设置金属度
-                                roughness: 0.7, // 设置粗糙度
-                            })
+                            
                         }
-                    }
-                })
+                    })
 
-                this.moduleFun(this._sceneGroup)
+                    this.moduleFun(this._sceneGroup)
 
-                // 添加动画
-                this.animation(type === "glb" || "gltf" ? gltf : this._sceneGroup)
+                    // 添加动画
+                    this.animation(type === "glb" || "gltf" ? gltf : this._sceneGroup)
 
-                // 将模型添加到场景中
-                this._scene.add(this._sceneGroup!);
+                    // 将模型添加到场景中
+                    this._scene.add(this._sceneGroup);
+                } else { 
+                    throw new Error("模型加载失败");
+                }
             }, (val) => {
                 const loadProgress = Math.floor((val.loaded / val.total) * 100)
                 console.log("模型已加载: ", loadProgress + "%");
@@ -169,8 +154,48 @@ export class Loader {
         });
     }
 
+    updateMaterial(material: any, child: any) { 
+        if (material) {
+            // 调整有纹理时的材质
+            if (material.map) {
+                child.receiveShadow = true; // 接受阴影
+                material.metalness = 0.5; // 设置金属度
+                material.roughness = 0.5; // 设置粗糙度
+                // 设置模型自发光效果
+                if (material.emissive || material.emissiveMap) { 
+                    material.emissive.set(material.color);
+                    material.emissiveMap = material.map;
+                }
+            } else {  // 调整没有纹理时的材质
+                child.receiveShadow = false; // 接受阴影
+                material = new THREE.MeshStandardMaterial({
+                    color: material.color, // 设置模型自身颜色
+                    metalness: 0.5, // 设置金属度
+                    roughness: 0.4, // 设置粗糙度
+                    // emissive: new THREE.Color(0x222222), // 设置自发光
+                    // emissiveIntensity: 1, // 设置自发光强度
+                });
+            }
+        } else {
+            // 设置没有材质的网格
+            child.receiveShadow = true; // 接受阴影
+            material = new THREE.MeshStandardMaterial({
+                color: 0x888888, // 设置颜色
+                metalness: 0.5, // 设置金属度
+                roughness: 0.7, // 设置粗糙度
+            });
+        }
+    
+        // 确保材质被正确应用到网格模型上
+        if (material.needsUpdate) {
+            material.needsUpdate = true;
+        }
+    }
+
     moduleFun(model: any) { 
         if (!model) return;
+        // 设置模型变换矩阵
+        model.updateMatrixWorld(true);
         // 创建包围盒
         const box3 = new THREE.Box3().setFromObject(model);
         // 包围盒大小
@@ -179,24 +204,30 @@ export class Loader {
         const boxCenter = box3.getCenter(new THREE.Vector3());
         // 创建包围盒辅助器
         const box3Helper = new THREE.Box3Helper(box3, 0xff0000)
+        // 设置包围盒控制器
         if (this.changeBox3box) { 
             this._scene.add(box3Helper);
         }
+
+        // 平移模型，使几何中心位于原点
+        model.position.sub(boxCenter);
         
-        box3Helper.rotateX(this.changeSetModlseRotate.x);
-        box3Helper.rotateY(this.changeSetModlseRotate.y);
-        box3Helper.rotateZ(this.changeSetModlseRotate.z);
-        model.rotateX(this.changeSetModlseRotate.x); 
-        model.rotateY(this.changeSetModlseRotate.y); 
-        model.rotateZ(this.changeSetModlseRotate.z); 
+        // 旋转模型
+        const rotateX = THREE.MathUtils.degToRad(this.changeSetModlseRotate.x)
+        const rotateY = THREE.MathUtils.degToRad(this.changeSetModlseRotate.y)
+        const rotateZ = THREE.MathUtils.degToRad(this.changeSetModlseRotate.z)
+        box3Helper.rotation.set(rotateX, rotateY, rotateZ);
+        model.rotation.set(rotateX, rotateY, rotateZ); 
+        
+        // 再将模型平移回原来的位置
+        model.position.add(boxCenter);
 
 
         // 根据给定的尺寸，计算相机的位置和截锥体的近平面和远平面。
         this.frameArea({
             sizeToFitOnScreen: boxSize * 1.5,
             boxSize: boxSize,
-            boxCenter: boxCenter,
-            model: model
+            boxCenter: boxCenter
         });
 
         //  
@@ -210,8 +241,7 @@ export class Loader {
     frameArea({
         sizeToFitOnScreen,
         boxSize,
-        boxCenter,
-        model
+        boxCenter
     }) { 
         // 根据计算出的尺寸将其一半的尺寸作为相机距离物体的距离
         const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
@@ -252,28 +282,13 @@ export class Loader {
     
     // 添加模型动画
     animation(obj) { 
-        // 创建时钟
-        const clock = new THREE.Clock();
-
         obj.animations.forEach((anima, index) => {
-            this.modleClipAction = this._modleAnimate!.clipAction(anima);
-            this.modleAnimateIndex = index
-            
+            this.modleAnimateIndex[index] = this.modleAnimate?.clipAction(anima);
         });
-        const tick = () => { 
-            if (this._modleAnimate) { 
-                this._modleAnimate.update(clock.getDelta());
-            }
-
-            this._renderer.render(this._scene, this._camera);
-            window.requestAnimationFrame(tick)
-        }
-        tick();
-
+        
     }
 
     modleAnimateChild(child: number, config?: any) {
-        // const { child, iterationCount, speed } = data
         let iterationCount,
             speed; 
         
@@ -290,28 +305,29 @@ export class Loader {
             speed = config.speed;
         }
         
-
         // 判断播放哪个动画
-        if (child-1 === this.modleAnimateIndex) { 
-            // 重置动画
-            this.modleClipAction.reset();  
-            // 开始播放动画
-            this.modleClipAction.play()
-
-            // 动画循环方式
-            if (iterationCount && iterationCount === 1) {
-                this.modleClipAction.loop = THREE.LoopOnce; 
-            } else if (iterationCount && iterationCount === "infinite") { 
-                this.modleClipAction.loop = THREE.LoopRepeat;
-            }
-
-            // 播放速度
-            if (iterationCount && (speed || speed === 0)) { 
-                this.modleClipAction.timeScale = speed
-            }
+        for (const key in this.modleAnimateIndex) { 
             
-            
-        } 
+            if (key === child.toString()) { 
+                this.modleClipAction = this.modleAnimateIndex[key];
+
+                this.modleClipAction.reset();  
+                // 开始播放动画
+                this.modleClipAction.play()
+
+                // 动画循环方式
+                if (iterationCount && iterationCount === 1) {
+                    this.modleClipAction.loop = THREE.LoopOnce; 
+                } else if (iterationCount && iterationCount === "infinite") { 
+                    this.modleClipAction.loop = THREE.LoopRepeat;
+                }
+
+                // 播放速度
+                if (iterationCount && (speed || speed === 0)) { 
+                    this.modleClipAction.timeScale = speed
+                }
+            }
+        }
 
     }
 
