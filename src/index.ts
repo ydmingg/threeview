@@ -54,7 +54,31 @@ for (let i = 0; i < 2; i++) {
     button.style.userSelect = "none";
     oPopup.appendChild(button);
     button.addEventListener("click", () => { 
-        threeView.setModesAnimate(i, { iterationCount: 1, speed: 1 });
+        // threeView.setModesAnimate(i, { iterationCount: 1, speed: 1 });
         
+        // 测试声音
+        checkMicrophoneAvailability()
     })
 }
+
+// 调用麦克风
+function checkMicrophoneAvailability() {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(function(stream) {
+        // 如果到达这里，说明麦克风可用
+        console.log("麦克风可用")
+        stream.getTracks().forEach(track => track.stop()); // 停止流
+      })
+      .catch(function(error) {
+        if (error.name === 'NotAllowedError') {
+          // 用户拒绝了权限请求
+          console.log("用户拒绝了麦克风权限") ;
+        } else if (error.name === 'NotReadableError') {
+          // 麦克风设备不可用
+          console.log("麦克风设备不可用") 
+        } else {
+          // 其他错误
+          console.log("检查麦克风时发生错误") 
+        }
+      });
+  }
