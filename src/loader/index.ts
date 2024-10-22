@@ -21,6 +21,7 @@ export class Loader {
     
     loaderMap: {}
     isbox3Helper: boolean = false
+    isAxesHelper: boolean = false
     modleRotateMap: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 }
     modleAnimateIndex: Array<any> = [];
     modleClipAction: any;
@@ -209,6 +210,12 @@ export class Loader {
             this._scene.add(box3Helper);
         }
 
+        // 创建坐标轴辅助器
+        const axesHelper = new THREE.AxesHelper(120);
+        if (this.changeAxesHelper) { 
+            this._scene.add(axesHelper);
+        }
+
         // 平移模型，使几何中心位于原点
         model.position.sub(boxCenter);
         
@@ -276,6 +283,10 @@ export class Loader {
     get changeBox3box() { 
         return this.isbox3Helper
     }
+    get changeAxesHelper() { 
+        return this.isAxesHelper
+    }
+    
     get changeSetModlseRotate() { 
         return this.modleRotateMap
     }

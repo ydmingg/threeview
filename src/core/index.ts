@@ -165,6 +165,10 @@ export class Core{
             if (key === "box3" && data[key]) { 
                 this._loader.isbox3Helper = true;
             }
+            // 坐标轴
+            if (key === "axes" && data[key]) { 
+                this._loader.isAxesHelper = true;
+            }
         }
 
     }

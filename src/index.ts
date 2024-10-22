@@ -13,7 +13,8 @@ const threeView = new ThreeView(app, {
 // const data = '../module/NP102/Model/J01/J01.fbx' 
 // const data = '../module/an-girl.fbx'
 // const data = '../module/xxxxx.fbx'
-const data = '../module/001.glb'
+// const data = '../module/001.glb'
+const data = '../module/1a.fbx'
 // const data = '../module/020.glb'
 // const data = '../module/suzanne.gltf'
 // const data = '../module/003.fbx'
@@ -24,6 +25,7 @@ const datas = threeView.setData(data);
 threeView.windowWiew({
     fps: true, // 开启fps帧率
     // box3: true, // 开启包围盒
+    axes: true, // 开启坐标轴
 
 });
 
@@ -81,4 +83,4 @@ function checkMicrophoneAvailability() {
           console.log("检查麦克风时发生错误") 
         }
       });
-  }
+}
