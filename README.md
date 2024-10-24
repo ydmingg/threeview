@@ -7,9 +7,7 @@ threeview 是一个免费开源的图形渲染器。(目前测试中)。
 
 ## 使用
 
-- `git clone git@github.com:ydmingg/threeview.git`
-- `cd threeview`
-- `npm install`
+- `npm install git@github.com:ydmingg/threeview.git`
 - `npm run dev`
 
 
