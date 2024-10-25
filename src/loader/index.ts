@@ -18,6 +18,8 @@ export class Loader {
     private _loader_drc: DRACOLoader
     private _sceneGroup: THREE.Group | THREE.Mesh | undefined;
     modleAnimate: THREE.AnimationMixer | undefined;
+    loadCompleteEvent!: () => void;
+
     
     loaderMap: {}
     isbox3Helper: boolean = false
@@ -57,12 +59,20 @@ export class Loader {
     }
 
 
+    // 触发加载完成事件
+    private triggerLoadComplete() {
+        if (this.loadCompleteEvent) {
+            this.loadCompleteEvent();
+        }
+    }
+
+
     // 异步加载全部场景和模型
     async loadScenes(data: any) { 
         try {
             // 开始加载模型
             await this._loadScenesModel(data);
-            
+            this.triggerLoadComplete(); // 触发加载完成事件
 
         } catch (err) { 
             console.log("场景模型加载错误：" + err);
@@ -71,7 +81,7 @@ export class Loader {
     }
 
     // 处理模型加载
-    private async _loadScenesModel(data: any) { 
+    private async _loadScenesModel(data: any): Promise<void> { 
         return new Promise(resolve => {
             // 检测文件类型
             const type = data.substring(data.lastIndexOf(".") + 1) 
@@ -144,11 +154,14 @@ export class Loader {
 
                     // 将模型添加到场景中
                     this._scene.add(this._sceneGroup);
+
                 } else { 
                     throw new Error("模型加载失败");
                 }
-            }, (val) => {
-                const loadProgress = Math.floor((val.loaded / val.total) * 100)
+
+                resolve();
+            }, (event) => {
+                const loadProgress = Math.floor((event.loaded / event.total) * 100)
                 console.log("模型已加载: ", loadProgress + "%");
                 
             });
@@ -299,22 +312,37 @@ export class Loader {
         
     }
 
-    modleAnimateChild(child: number, config?: any) {
-        let iterationCount,
-            speed; 
+    modleAnimateChild(child: number, config?: {iterationCount?: number | string, speed?: number}) {
+        let iterationCount = config?.iterationCount;
+        let speed = config?.speed;
         
-        if (!config || JSON.stringify(config) === '{}') {
-            iterationCount = undefined;
-            speed = undefined;
-
-            // 设置对象不能为空
-            if (JSON.stringify(config) === '{}') {
-                throw new Error("参数错误：请传入正确参数");
-            }
-        } else { 
-            iterationCount = config.iterationCount;
-            speed = config.speed;
+        if (child === undefined || (config !== undefined && JSON.stringify(config) === '{}')) {
+            throw new Error("参数错误：请传入正确参数");
         }
+        
+        
+        // if (!config || JSON.stringify(config) === '{}') {
+        //     iterationCount = undefined;
+        //     speed = undefined;
+
+        //     // 设置对象不能为空
+        //     if (JSON.stringify(config) === '{}') {
+        //         throw new Error("参数错误：请传入正确参数");
+        //     }
+        // } else {
+        //     iterationCount = config.iterationCount;
+        //     speed = config.speed;
+        // }
+        
+        
+        // 默认值处理
+        if (iterationCount === undefined) {
+            iterationCount = "Infinity"; // 默认无限循环
+        }
+        if (speed === undefined) {
+            speed = 1; // 默认速度为1
+        }
+        
         
         // 判断播放哪个动画
         for (const key in this.modleAnimateIndex) { 
@@ -325,12 +353,16 @@ export class Loader {
                 this.modleClipAction.reset();  
                 // 开始播放动画
                 this.modleClipAction.play()
-
+                
                 // 动画循环方式
-                if (iterationCount && iterationCount === 1) {
+                if (iterationCount === 1) {
                     this.modleClipAction.loop = THREE.LoopOnce; 
-                } else if (iterationCount && iterationCount === "infinite") { 
+                    
+                } else if (iterationCount === "Infinity") { 
                     this.modleClipAction.loop = THREE.LoopRepeat;
+                    
+                } else {
+                    this.modleClipAction.loop = THREE.LoopOnce;
                 }
 
                 // 播放速度
@@ -341,6 +373,8 @@ export class Loader {
         }
 
     }
+
+    
 
 
 }

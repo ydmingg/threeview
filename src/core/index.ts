@@ -54,8 +54,8 @@ export class Core{
 
     // 初始化场景
     private _initScene() { 
-        // 设置场景背景颜色
-        this.scene.background = new THREE.Color("#a0a0a0");
+        // 设置场景背景颜色 180deg, #a9b1b5 0%, #f3f3f3 100%);
+        this.scene.background = new THREE.Color("#f3f3f3");
     }
 
     // 初始化相机
@@ -181,7 +181,11 @@ export class Core{
         this._loader.modleRotateMap = obj;
         
     }
-
+    // 模型加载完成后触发的事件
+    onLoadComplete(callback: () => void) {
+        this._loader.loadCompleteEvent = callback;
+        
+    }
     
 
 

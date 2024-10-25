@@ -13,8 +13,8 @@ const threeView = new ThreeView(app, {
 // const data = '../module/NP102/Model/J01/J01.fbx' 
 // const data = '../module/an-girl.fbx'
 // const data = '../module/xxxxx.fbx'
-// const data = '../module/001.glb'
-const data = '../module/1a.fbx'
+const data = '../module/001.glb'
+// const data = '../module/1a.fbx'
 // const data = '../module/020.glb'
 // const data = '../module/suzanne.gltf'
 // const data = '../module/003.fbx'
@@ -25,16 +25,12 @@ const datas = threeView.setData(data);
 threeView.windowWiew({
     fps: true, // 开启fps帧率
     // box3: true, // 开启包围盒
-    axes: true, // 开启坐标轴
+    // axes: true, // 开启坐标轴
 
 });
 
 // 设置模型旋转轴
 threeView.setModesRotate({ x: 0, y: -90, z: 0 });
-
-// 播放动画
-// threeView.setModesAnimate(0);
-
 
 
 // 动画测试
@@ -46,22 +42,32 @@ oPopup.style.gap = "10px";
 oPopup.style.top = "40px";
 oPopup.style.right = "40px";
 
-for (let i = 0; i < 2; i++) {
-    const button = document.createElement("button");
-    button.innerHTML = "动画"+(i+1)+"";
-    button.style.padding = "10px 20px";
-    button.style.background = "#f0da62";
-    button.style.borderRadius = "5px";
-    button.style.cursor = "pointer";
-    button.style.userSelect = "none";
-    oPopup.appendChild(button);
-    button.addEventListener("click", () => { 
-        // threeView.setModesAnimate(i, { iterationCount: 1, speed: 1 });
-        
-        // 测试声音
-        checkMicrophoneAvailability()
-    })
-}
+
+threeView.onLoadComplete(() => {
+    // 启动动画
+    // threeView.setModesAnimate(0, { iterationCount: 1, speed: 1 });
+    
+    // 绑定点击事件
+    for (let i = 0; i < 2; i++) {
+        const button = document.createElement("button");
+        button.innerHTML = "动画"+(i+1)+"";
+        button.style.padding = "10px 20px";
+        button.style.background = "#f0da62";
+        button.style.borderRadius = "5px";
+        button.style.cursor = "pointer";
+        button.style.userSelect = "none";
+        oPopup.appendChild(button);
+        button.addEventListener("click", () => { 
+            threeView.setModesAnimate(i, { iterationCount: 1, speed: 1 });
+            
+            // 测试声音
+            // checkMicrophoneAvailability()
+        })
+    }
+
+});
+
+
 
 // 调用麦克风
 function checkMicrophoneAvailability() {
