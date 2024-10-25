@@ -33,6 +33,7 @@ export default class ThreeView {
         this._core.setModesAnimate(child, config);
     }
 
+    
     onLoadComplete(callback: () => void) {
         this._core.onLoadComplete(callback);
         
