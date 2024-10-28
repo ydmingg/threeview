@@ -1,4 +1,4 @@
-import ThreeView from "./threeview/init";
+import ThreeView from "./threeview";
 
 // 实例化threeview
 const app = document.getElementById("app") as HTMLDivElement;
@@ -9,15 +9,15 @@ const threeView = new ThreeView(app, {
 });
 
 // 渲染数据
-// const data = '../module/an-hello.fbx' 
-// const data = '../module/NP102/Model/J01/J01.fbx' 
-// const data = '../module/an-girl.fbx'
-// const data = '../module/xxxxx.fbx'
-const data = '../module/001.glb'
-// const data = '../module/1a.fbx'
-// const data = '../module/020.glb'
-// const data = '../module/suzanne.gltf'
-// const data = '../module/003.fbx'
+// const data = '../model/an-hello.fbx' 
+// const data = '../model/NP102/Model/J01/J01.fbx' 
+// const data = '../model/an-girl.fbx'
+// const data = '../model/xxxxx.fbx'
+const data = '../model/001.glb'
+// const data = '../model/1a.fbx'
+// const data = '../model/020.glb'
+// const data = '../model/suzanne.gltf'
+// const data = '../model/003.fbx'
 // const data = 'https://static.funxdata.com/view/skphouse.fbx'
 const datas = threeView.setData(data);
 
@@ -42,7 +42,7 @@ oPopup.style.gap = "10px";
 oPopup.style.top = "40px";
 oPopup.style.right = "40px";
 
-
+// 检测模型加载完成
 threeView.onLoadComplete(() => {
     // 启动动画
     // threeView.setModesAnimate(0, { iterationCount: 1, speed: 1 });
